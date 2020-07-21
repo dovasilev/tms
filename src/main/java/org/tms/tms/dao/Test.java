@@ -2,6 +2,7 @@ package org.tms.tms.dao;
 
 import com.vladmihalcea.hibernate.type.array.StringArrayType;
 import com.vladmihalcea.hibernate.type.json.JsonBinaryType;
+import com.vladmihalcea.hibernate.type.json.JsonStringType;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
@@ -17,6 +18,10 @@ import java.util.List;
 @Entity()
 @Getter(AccessLevel.PUBLIC)
 @Setter(AccessLevel.PUBLIC)
+@TypeDefs({
+        @TypeDef(name = "json", typeClass = JsonStringType.class),
+        @TypeDef(name = "jsonb", typeClass = JsonBinaryType.class)
+})
 public class Test {
 
     @Id
@@ -47,8 +52,9 @@ public class Test {
     @Column
     private Boolean automated;
 
-    @Column()
-    private List<Step> steps;
+    @Type(type = "jsonb")
+    @Column(columnDefinition = "json")
+    private Steps steps;
 
 
 }

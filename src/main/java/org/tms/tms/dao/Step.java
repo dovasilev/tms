@@ -1,11 +1,10 @@
 package org.tms.tms.dao;
 
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
-@Getter(AccessLevel.PRIVATE)
-@Setter(AccessLevel.PRIVATE)
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class Step {
 
     private Integer number;

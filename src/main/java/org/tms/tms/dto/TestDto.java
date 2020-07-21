@@ -2,6 +2,7 @@ package org.tms.tms.dto;
 
 import lombok.Data;
 import org.tms.tms.dao.Step;
+import org.tms.tms.dao.Steps;
 
 import java.util.List;
 
@@ -14,7 +15,6 @@ public class TestDto {
     private Long suiteId;
     private Long projectId;
     private Boolean automated;
-
-    private List<Step> steps;
+    private Steps steps;
 
 }
