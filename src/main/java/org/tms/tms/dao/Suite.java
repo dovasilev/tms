@@ -7,7 +7,6 @@ import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
 
 import javax.persistence.*;
-import javax.validation.constraints.NotNull;
 
 @Table()
 @Entity()
@@ -25,10 +24,16 @@ public class Suite {
     @Column
     private String description;
 
+
     @ManyToOne
     @NotFound(action = NotFoundAction.EXCEPTION)
-    @JoinColumn(name = "parentId", nullable = false)
-    @NotNull
-    private Type parentType;
+    @JoinColumn(name = "projectId", nullable = false )
+    private Project projectId;
+
+    @ManyToOne
+    @NotFound(action = NotFoundAction.IGNORE)
+    @JoinColumn(name = "parentId")
+    private Suite parentId;
+
 
 }
