@@ -35,12 +35,14 @@ import java.util.Optional;
 @CssImport("./styles/views/main/main-view.css")
 @Theme(value = Lumo.class, variant = Lumo.DARK)
 @PWA(name = "TMS", shortName = "TMS", enableInstallPrompt = false)
+@PageTitle("TMS")
 @Route("")
 public class MainPage extends AppLayout implements RouterLayout {
 
     private final Tabs menu;
     private H1 viewTitle;
     private Button logoutButton;
+    private HorizontalLayout header;
 
     public MainPage() {
         setPrimarySection(Section.DRAWER);
@@ -50,48 +52,20 @@ public class MainPage extends AppLayout implements RouterLayout {
     }
 
     private Component createHeaderContent() {
-        HorizontalLayout layout = new HorizontalLayout();
+        header = new HorizontalLayout();
         H1 h1 = new H1("TMS");
-        layout.setId("header");
-        layout.setWidthFull();
-        layout.setSpacing(false);
-        layout.getThemeList().set("dark", true);
-        layout.setAlignItems(FlexComponent.Alignment.CENTER);
-        layout.add(new DrawerToggle());
+        header.setId("header");
+        header.setWidthFull();
+        header.setSpacing(false);
+        header.getThemeList().set("dark", true);
+        header.setAlignItems(FlexComponent.Alignment.CENTER);
+        header.add(new DrawerToggle());
         viewTitle = new H1();
-        Button label = new Button();
-        label.setIcon(VaadinIcon.OPEN_BOOK.create());
-        label.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                //UI.getCurrent().access().getPage().open("/swagger");
-            }
-        });
-        label.getStyle().set("cursor", "pointer");
-        Select<String> theme = new Select<>();
-        theme.setLabel("Тема");
-        theme.setItems("Светлая", "Темная");
-        String nameTheme = this.getClass().getAnnotation(Theme.class).variant();
-        if (nameTheme.equals("dark"))
-            theme.setValue("Темная");
-        else if (nameTheme.equals("light"))
-            theme.setValue("Светлая");
-        theme.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<String>, String>>() {
-            @Override
-            public void valueChanged(AbstractField.ComponentValueChangeEvent<Select<String>, String> selectStringComponentValueChangeEvent) {
-                if (selectStringComponentValueChangeEvent.getValue().equals("Светлая")) {
-                    //UI.getCurrent().getPage().executeJs("document.querySelector('html').setAttribute('theme','light');");
-                } else if (selectStringComponentValueChangeEvent.getValue().equals("Темная")) {
-                    //UI.getCurrent().getPage().executeJs("document.querySelector('html').setAttribute('theme','dark');");
-                }
-            }
-        });
-        //layout.add(viewTitle,label,theme);
-        layout.add(viewTitle);
+        header.add(viewTitle);
         logoutButton = createMenuButton("Logout", VaadinIcon.SIGN_OUT.create());
         logoutButton.addClickListener(e -> logout());
         logoutButton.getElement().setAttribute("title", "Logout (Ctrl+L)");
-        return layout;
+        return header;
     }
 
     private Component createDrawerContent(Tabs menu) {
@@ -190,6 +164,39 @@ public class MainPage extends AppLayout implements RouterLayout {
         }
 
         // Finally, add logout button for all users
-        addToNavbar(logoutButton);
+        Button label = new Button();
+        label.setIcon(VaadinIcon.OPEN_BOOK.create());
+        label.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                UI.getCurrent().getPage().open("/swagger");
+            }
+        });
+        label.getStyle().set("cursor", "pointer");
+        Select<String> theme = new Select<>();
+        //theme.setLabel("Тема");
+        theme.setItems("Светлая", "Темная");
+        String nameTheme = this.getClass().getAnnotation(Theme.class).variant();
+        if (nameTheme.equals("dark"))
+            theme.setValue("Темная");
+        else if (nameTheme.equals("light"))
+            theme.setValue("Светлая");
+        theme.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<String>, String>>() {
+            @Override
+            public void valueChanged(AbstractField.ComponentValueChangeEvent<Select<String>, String> selectStringComponentValueChangeEvent) {
+                if (selectStringComponentValueChangeEvent.getValue().equals("Светлая")) {
+                    header.getThemeList().set("dark", false);
+                    UI.getCurrent().getPage().executeJs("document.querySelector('html').setAttribute('theme','light');");
+
+
+                } else if (selectStringComponentValueChangeEvent.getValue().equals("Темная")) {
+                    header.getThemeList().set("dark", true);
+                    UI.getCurrent().getPage().executeJs("document.querySelector('html').setAttribute('theme','dark');");
+                }
+            }
+        });
+        HorizontalLayout horizontalLayout = new HorizontalLayout(label,theme);
+        horizontalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
+        addToNavbar(horizontalLayout,logoutButton);
     }
 }
