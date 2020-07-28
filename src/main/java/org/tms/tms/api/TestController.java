@@ -59,4 +59,11 @@ public class TestController {
     public void deleteTest(@PathVariable Long testId) {
         testService.del(testId);
     }
+
+    @Operation(summary = "Delete Test", description = "", tags = { "Test" })
+    @DeleteMapping(value = "/testByProject/{projectId}")
+    public void deleteTestsByProject(@PathVariable Long projectId) {
+        testService.delAllByProject(projectId);
+    }
+
 }

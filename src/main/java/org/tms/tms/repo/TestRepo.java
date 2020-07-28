@@ -1,6 +1,7 @@
 package org.tms.tms.repo;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.tms.tms.dao.Test;
@@ -18,5 +19,9 @@ public interface TestRepo extends JpaRepository<Test, Long> {
 
     @Query("select test from Test test where test.suiteId.id in(:ids)")
     List<Test> findAllTestsBySuites(List<Long> ids);
+
+    @Modifying
+    @Query("delete Test where projectId.id = :projectId")
+    void deleteAllByProject(Long projectId);
 
 }

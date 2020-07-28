@@ -68,4 +68,9 @@ public class SuiteService {
         suiteRepo.delete(suite);
     }
 
+    @Transactional
+    public synchronized void deleteAllSuiteByProject(Long projectId) {
+        suiteRepo.deleteAllByProject(projectId);
+    }
+
 }

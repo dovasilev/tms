@@ -74,6 +74,12 @@ public class TestService {
     }
 
     @Transactional
+    public synchronized void delAllByProject(Long projectId) {
+        testRepo.deleteAllByProject(projectId);
+    }
+
+
+    @Transactional
     public synchronized Test updateTest(Long testId, TestDto testDto) {
         Test test = getById(testId);
         Project project = projectService.getProjectById(testDto.getProjectId());

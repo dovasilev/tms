@@ -1,6 +1,7 @@
 package org.tms.tms.repo;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 import org.tms.tms.dao.Suite;
@@ -22,4 +23,8 @@ public interface SuiteRepo extends JpaRepository<Suite, Long> {
             ")\n" +
             "SELECT * FROM nodes",nativeQuery = true)
     List<Suite> findAllChildSuitesBySuite(Long id);
+
+    @Modifying
+    @Query("delete Suite where projectId.id = :projectId")
+    void deleteAllByProject(Long projectId);
 }

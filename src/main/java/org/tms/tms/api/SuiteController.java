@@ -60,4 +60,10 @@ public class SuiteController {
         suiteService.deleteSuite(suiteId);
     }
 
+    @Operation(summary = "Delete Suite", description = "", tags = { "Suite" })
+    @DeleteMapping(value = "/suiteByProject/{projectId}")
+    public void deleteAllSuiteByProject(@PathVariable Long projectId) {
+        suiteService.deleteAllSuiteByProject(projectId);
+    }
+
 }
