@@ -4,11 +4,12 @@ import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
+import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.H1;
-import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -17,13 +18,12 @@ import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.router.*;
+import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
-import com.vaadin.flow.theme.material.Material;
+import org.tms.tms.authentication.AccessControl;
+import org.tms.tms.authentication.AccessControlFactory;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -32,15 +32,17 @@ import java.util.Optional;
  * The main view is a top-level placeholder for other views.
  */
 @JsModule("./styles/shared-styles.js")
-@CssImport("styles/views/main/main-view.css")
+@CssImport("./styles/views/main/main-view.css")
 @Theme(value = Lumo.class, variant = Lumo.DARK)
+@PWA(name = "TMS", shortName = "TMS", enableInstallPrompt = false)
 @Route("")
-public class MainUi extends AppLayout {
+public class MainPage extends AppLayout implements RouterLayout {
 
     private final Tabs menu;
     private H1 viewTitle;
+    private Button logoutButton;
 
-    public MainUi() {
+    public MainPage() {
         setPrimarySection(Section.DRAWER);
         addToNavbar(true, createHeaderContent());
         menu = createMenu();
@@ -62,7 +64,7 @@ public class MainUi extends AppLayout {
         label.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                UI.getCurrent().getPage().open("/swagger");
+                //UI.getCurrent().access().getPage().open("/swagger");
             }
         });
         label.getStyle().set("cursor", "pointer");
@@ -78,14 +80,17 @@ public class MainUi extends AppLayout {
             @Override
             public void valueChanged(AbstractField.ComponentValueChangeEvent<Select<String>, String> selectStringComponentValueChangeEvent) {
                 if (selectStringComponentValueChangeEvent.getValue().equals("Светлая")) {
-                    UI.getCurrent().getPage().executeJs("document.querySelector('html').setAttribute('theme','light');");
+                    //UI.getCurrent().getPage().executeJs("document.querySelector('html').setAttribute('theme','light');");
                 } else if (selectStringComponentValueChangeEvent.getValue().equals("Темная")) {
-                    UI.getCurrent().getPage().executeJs("document.querySelector('html').setAttribute('theme','dark');");
+                    //UI.getCurrent().getPage().executeJs("document.querySelector('html').setAttribute('theme','dark');");
                 }
             }
         });
         //layout.add(viewTitle,label,theme);
         layout.add(viewTitle);
+        logoutButton = createMenuButton("Logout", VaadinIcon.SIGN_OUT.create());
+        logoutButton.addClickListener(e -> logout());
+        logoutButton.getElement().setAttribute("title", "Logout (Ctrl+L)");
         return layout;
     }
 
@@ -118,7 +123,7 @@ public class MainUi extends AppLayout {
         RouterLink[] links = new RouterLink[] {
                 new RouterLink("Проекты", ProjectsView.class)
         };
-        return Arrays.stream(links).map(MainUi::createTab).toArray(Tab[]::new);
+        return Arrays.stream(links).map(MainPage::createTab).toArray(Tab[]::new);
     }
 
     private static Tab createTab(Component content) {
@@ -155,100 +160,36 @@ public class MainUi extends AppLayout {
         return getContent().getClass().getAnnotation(PageTitle.class).value();
     }
 
-    /*public MainUi() {
-        menu = createMenuTabs();
-        Button label = new Button();
-        label.setIcon(VaadinIcon.OPEN_BOOK.create());
-        label.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                UI.getCurrent().getPage().open("/swagger");
-            }
-        });
-        label.getStyle().set("cursor", "pointer");
-        Select<String> theme = new Select<>();
-        theme.setLabel("Тема");
-        theme.setItems("Светлая", "Темная");
-        String nameTheme = this.getClass().getAnnotation(Theme.class).variant();
-        if (nameTheme.equals("dark"))
-            theme.setValue("Темная");
-        else if (nameTheme.equals("light"))
-            theme.setValue("Светлая");
-        theme.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<String>, String>>() {
-            @Override
-            public void valueChanged(AbstractField.ComponentValueChangeEvent<Select<String>, String> selectStringComponentValueChangeEvent) {
-                if (selectStringComponentValueChangeEvent.getValue().equals("Светлая")) {
-                    UI.getCurrent().getPage().executeJs("document.querySelector('html').setAttribute('theme','light');");
-                } else if (selectStringComponentValueChangeEvent.getValue().equals("Темная")) {
-                    UI.getCurrent().getPage().executeJs("document.querySelector('html').setAttribute('theme','dark');");
-                }
-            }
-        });
-        HorizontalLayout horizontalLayout = new HorizontalLayout();
-        horizontalLayout.add(label, theme);
-        horizontalLayout.setSpacing(false);
-        addToNavbar(menu, horizontalLayout);
+
+    private Button createMenuButton(String caption, Icon icon) {
+        final Button routerButton = new Button(caption);
+        routerButton.setClassName("menu-button");
+        routerButton.addThemeVariants(ButtonVariant.LUMO_TERTIARY_INLINE);
+        routerButton.setIcon(icon);
+        icon.setSize("24px");
+        return routerButton;
     }
 
-    private static Tabs createMenuTabs() {
-        final Tabs tabs = new Tabs();
-        tabs.getStyle().set("display", "contents");
-        tabs.setOrientation(Tabs.Orientation.VERTICAL);
-        tabs.add(getAvailableTabs());
-        return tabs;
-    }
-
-    private static Tab[] getAvailableTabs() {
-        final List<Tab> tabs = new ArrayList<>();
-        tabs.add(createTab("Проекты", ProjectsView.class));
-        tabs.add(createTab("Проекты 1", ProjectsView.class));
-        tabs.add(createTab("Проекты 2", ProjectsView.class));
-        tabs.add(createTab("Проекты 3", ProjectsView.class));
-        tabs.add(createTab("Проекты 4", ProjectsView.class));
-        return tabs.toArray(new Tab[tabs.size()]);
-    }
-
-    private static Tab createTab(String title, Class<? extends Component> viewClass) {
-        return createTab(populateLink(new RouterLink(null, viewClass), title));
-    }
-
-    private static Tab createTab(Component content) {
-        final Tab tab = new Tab();
-        tab.addThemeVariants(TabVariant.LUMO_ICON_ON_TOP);
-        tab.add(content);
-        return tab;
-    }
-
-    private static <T extends HasComponents> T populateLink(T a, String title) {
-        a.add(title);
-        return a;
+    private void logout() {
+        AccessControlFactory.getInstance().createAccessControl().signOut();
     }
 
     @Override
-    protected void afterNavigation() {
-        super.afterNavigation();
-        selectTab();
-    }
+    protected void onAttach(AttachEvent attachEvent) {
+        super.onAttach(attachEvent);
 
-    private void selectTab() {
-        RoutePrefix routePrefix = getContent().getClass().getAnnotation(RoutePrefix.class);
-        if (routePrefix != null) {
-            Optional<Component> tabToSelect = menu.getChildren().filter(tab -> {
-                Component child = tab.getChildren().findFirst().get();
-                return child instanceof RouterLink && routePrefix.value().equals(((RouterLink) child).getHref());
-            }).findFirst();
-            tabToSelect.ifPresent(tab -> menu.setSelectedTab((Tab) tab));
-        } else {
-            String target = RouteConfiguration.forSessionScope().getUrl(getContent().getClass());
-            Optional<Component> tabToSelect = menu.getChildren().filter(tab -> {
-                Component child = tab.getChildren().findFirst().get();
-                return child instanceof RouterLink && target.contains(((RouterLink) child).getHref());
-            }).findFirst();
-            tabToSelect.ifPresent(tab -> menu.setSelectedTab((Tab) tab));
+        // User can quickly activate logout with Ctrl+L
+        attachEvent.getUI().addShortcutListener(() -> logout(), Key.KEY_L,
+                KeyModifier.CONTROL);
+
+        // add the admin view menu item if user has admin role
+        final AccessControl accessControl = AccessControlFactory.getInstance()
+                .createAccessControl();
+        if (accessControl.isUserInRole(AccessControl.ADMIN_ROLE_NAME)) {
+
         }
-    }
 
-    public Tabs getMenu() {
-        return menu;
-    }*/
+        // Finally, add logout button for all users
+        addToNavbar(logoutButton);
+    }
 }
