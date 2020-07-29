@@ -28,6 +28,10 @@ public class SuiteService {
         return suiteRepo.findAllChildSuitesBySuite(suiteId);
     }
 
+    public List<Suite> getChildSuitesBySuite(Long suiteId){
+        return suiteRepo.findChildSuitesBySuite(suiteId);
+    }
+
     public Suite getSuiteById(Long suiteId)  {
         return suiteRepo.findById(suiteId).get();
     }
@@ -67,10 +71,4 @@ public class SuiteService {
         Suite suite = getSuiteById(suiteId);
         suiteRepo.delete(suite);
     }
-
-    @Transactional
-    public synchronized void deleteAllSuiteByProject(Long projectId) {
-        suiteRepo.deleteAllByProject(projectId);
-    }
-
 }

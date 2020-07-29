@@ -20,8 +20,4 @@ public interface TestRepo extends JpaRepository<Test, Long> {
     @Query("select test from Test test where test.suiteId.id in(:ids)")
     List<Test> findAllTestsBySuites(List<Long> ids);
 
-    @Modifying
-    @Query("delete Test where projectId.id = :projectId")
-    void deleteAllByProject(Long projectId);
-
 }

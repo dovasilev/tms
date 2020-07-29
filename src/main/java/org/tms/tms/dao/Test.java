@@ -41,11 +41,13 @@ public class Test {
     @ManyToOne
     @NotFound(action = NotFoundAction.IGNORE)
     @JoinColumn(name = "suiteId")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Suite suiteId;
 
     @ManyToOne
     @NotFound(action = NotFoundAction.EXCEPTION)
     @JoinColumn(name = "projectId", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @NotNull
     private Project projectId;
 

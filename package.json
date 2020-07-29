@@ -45,7 +45,8 @@
       "@vaadin/vaadin-tabs": "3.1.0",
       "@vaadin/vaadin-lumo-styles": "1.6.0",
       "@vaadin/vaadin-material-styles": "1.3.2",
-      "@vaadin/vaadin-rich-text-editor": "1.2.0"
+      "@vaadin/vaadin-rich-text-editor": "1.2.0",
+      "@polymer/paper-toggle-button": "^3.0.1"
     },
     "devDependencies": {
       "compression-webpack-plugin": "3.1.0",
@@ -63,7 +64,7 @@
       "webpack-merge": "4.2.2",
       "webpack-dev-server": "3.10.3"
     },
-    "hash": "b066f8428be2ee37965ba27746ac3c9cb5d8da9a55d7d8c3046e956b5d1e6bac"
+    "hash": "d5d151d67444fd2564bc0a073362b7957582652b3e7995b97b353c2ef2fe773f"
   },
   "dependencies": {
     "@vaadin/router": "1.7.2",
@@ -109,7 +110,8 @@
     "@vaadin/vaadin-tabs": "3.1.0",
     "@vaadin/vaadin-lumo-styles": "1.6.0",
     "@vaadin/vaadin-material-styles": "1.3.2",
-    "@vaadin/vaadin-rich-text-editor": "1.2.0"
+    "@vaadin/vaadin-rich-text-editor": "1.2.0",
+    "@polymer/paper-toggle-button": "^3.0.1"
   },
   "devDependencies": {
     "compression-webpack-plugin": "3.1.0",

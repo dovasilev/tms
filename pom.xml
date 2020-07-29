@@ -161,9 +161,11 @@
             <artifactId>url-parameter-mapping</artifactId>
             <version>1.0.0-beta2</version>
         </dependency>
-
-        <!-- https://mvnrepository.com/artifact/com.flowingcode.vaadin.addons/error-window-vaadin -->
-
+        <dependency>
+            <groupId>com.gmail.umit</groupId>
+            <artifactId>papertogglebuttonv14</artifactId>
+            <version>1.0.0</version>
+        </dependency>
     </dependencies>
 
     <build>

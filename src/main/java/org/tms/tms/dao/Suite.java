@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.NotFound;
 import org.hibernate.annotations.NotFoundAction;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 
@@ -25,14 +27,16 @@ public class Suite {
     private String description;
 
 
-    @ManyToOne
+    @ManyToOne()
     @NotFound(action = NotFoundAction.EXCEPTION)
-    @JoinColumn(name = "projectId", nullable = false )
+    @JoinColumn(name = "projectId", nullable = false)
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Project projectId;
 
-    @ManyToOne
+    @ManyToOne()
     @NotFound(action = NotFoundAction.IGNORE)
     @JoinColumn(name = "parentId")
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Suite parentId;
 
 

@@ -11,7 +11,7 @@ import java.util.List;
 @Repository
 public interface SuiteRepo extends JpaRepository<Suite, Long> {
 
-    @Query("select suite from Suite suite where suite.projectId = :id")
+    @Query("select suite from Suite suite where suite.projectId.id = :id")
     List<Suite> findAllSuiteByProject(Long id);
 
     @Query(value = "WITH RECURSIVE nodes AS (\n" +
@@ -24,7 +24,6 @@ public interface SuiteRepo extends JpaRepository<Suite, Long> {
             "SELECT * FROM nodes",nativeQuery = true)
     List<Suite> findAllChildSuitesBySuite(Long id);
 
-    @Modifying
-    @Query("delete Suite where projectId.id = :projectId")
-    void deleteAllByProject(Long projectId);
+    @Query("select suite from Suite suite where suite.parentId.id = :id")
+    List<Suite> findChildSuitesBySuite(Long id);
 }

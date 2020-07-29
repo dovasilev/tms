@@ -73,11 +73,6 @@ public class TestService {
         testRepo.delete(test);
     }
 
-    @Transactional
-    public synchronized void delAllByProject(Long projectId) {
-        testRepo.deleteAllByProject(projectId);
-    }
-
 
     @Transactional
     public synchronized Test updateTest(Long testId, TestDto testDto) {

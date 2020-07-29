@@ -1,10 +1,13 @@
 package org.tms.tms.web.view;
 
+import com.vaadin.flow.component.AttachEvent;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -25,7 +28,7 @@ import org.vaadin.crudui.crud.impl.GridCrud;
 
 import java.util.Collection;
 
-@Route(value = "projects", layout = MainPage.class)
+@Route(value = "Projects", layout = MainPage.class)
 @PageTitle("Projects")
 public class ProjectsView extends VerticalLayout {
 
@@ -105,14 +108,19 @@ public class ProjectsView extends VerticalLayout {
         projectGrid.setFindAllOperation(() -> {
             return projectController.getAllProjects();
         });
+        projectGrid.getGrid().addItemClickListener(new ComponentEventListener<ItemClickEvent<Project>>() {
+            @Override
+            public void onComponentEvent(ItemClickEvent<Project> projectItemClickEvent) {
+                UI.getCurrent().navigate(ProjectView.class,
+                        projectItemClickEvent.getItem().getId().toString());
+            }
+        });
         add(projectGrid);
     }
 
     private Button createRemoveButton(Project project) {
         @SuppressWarnings("unchecked")
         Button button = new Button("Удалить", clickEvent -> {
-            testController.deleteTestsByProject(project.getId());
-            suiteController.deleteAllSuiteByProject(project.getId());
             projectController.deleteProject(project.getId());
             projectGrid.refreshGrid();
         });

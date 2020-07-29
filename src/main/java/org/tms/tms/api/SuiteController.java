@@ -34,9 +34,15 @@ public class SuiteController {
     }
 
     @Operation(summary = "Get all Child Suites in Suite", description = "Return all Child Suites in Suite", tags = { "Suite" })
-    @GetMapping(value = "/childSuites/{suiteId}")
+    @GetMapping(value = "/childAllSuites/{suiteId}")
     public Collection<Suite> getAllChildSuiteBySuite(@PathVariable Long suiteId) {
         return suiteService.getAllChildSuiteBySuite(suiteId);
+    }
+
+    @Operation(summary = "Get Child Suites in Suite", description = "Return Child Suites in Suite", tags = { "Suite" })
+    @GetMapping(value = "/childSuites/{suiteId}")
+    public Collection<Suite> getChildSuiteBySuite(@PathVariable Long suiteId) {
+        return suiteService.getChildSuitesBySuite(suiteId);
     }
 
     @Operation(summary = "Add Suite", description = "Return created Suite", tags = { "Suite" })
@@ -58,12 +64,6 @@ public class SuiteController {
     @DeleteMapping(value = "/suite/{suiteId}")
     public void deleteSuite(@PathVariable Long suiteId) {
         suiteService.deleteSuite(suiteId);
-    }
-
-    @Operation(summary = "Delete Suite", description = "", tags = { "Suite" })
-    @DeleteMapping(value = "/suiteByProject/{projectId}")
-    public void deleteAllSuiteByProject(@PathVariable Long projectId) {
-        suiteService.deleteAllSuiteByProject(projectId);
     }
 
 }

@@ -1,12 +1,12 @@
 package org.tms.tms.web.view;
 
+import com.gmail.umit.PaperToggleButton;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
@@ -14,10 +14,10 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
+import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
@@ -31,9 +31,9 @@ import java.util.Optional;
 /**
  * The main view is a top-level placeholder for other views.
  */
-@JsModule("./styles/shared-styles.js")
+//@JsModule("./styles/shared-styles.js")
 @CssImport("./styles/views/main/main-view.css")
-@Theme(value = Lumo.class, variant = Lumo.DARK)
+@Theme(value = Lumo.class)
 @PWA(name = "TMS", shortName = "TMS", enableInstallPrompt = false)
 @PageTitle("TMS")
 @Route("")
@@ -53,7 +53,6 @@ public class MainPage extends AppLayout implements RouterLayout {
 
     private Component createHeaderContent() {
         header = new HorizontalLayout();
-        H1 h1 = new H1("TMS");
         header.setId("header");
         header.setWidthFull();
         header.setSpacing(false);
@@ -172,30 +171,22 @@ public class MainPage extends AppLayout implements RouterLayout {
                 UI.getCurrent().getPage().open("/swagger");
             }
         });
-        label.getStyle().set("cursor", "pointer");
-        Select<String> theme = new Select<>();
-        //theme.setLabel("Тема");
-        theme.setItems("Светлая", "Темная");
-        String nameTheme = this.getClass().getAnnotation(Theme.class).variant();
-        if (nameTheme.equals("dark"))
-            theme.setValue("Темная");
-        else if (nameTheme.equals("light"))
-            theme.setValue("Светлая");
-        theme.addValueChangeListener(new HasValue.ValueChangeListener<AbstractField.ComponentValueChangeEvent<Select<String>, String>>() {
-            @Override
-            public void valueChanged(AbstractField.ComponentValueChangeEvent<Select<String>, String> selectStringComponentValueChangeEvent) {
-                if (selectStringComponentValueChangeEvent.getValue().equals("Светлая")) {
-                    header.getThemeList().set("dark", false);
-                    UI.getCurrent().getPage().executeJs("document.querySelector('html').setAttribute('theme','light');");
-
-
-                } else if (selectStringComponentValueChangeEvent.getValue().equals("Темная")) {
-                    header.getThemeList().set("dark", true);
-                    UI.getCurrent().getPage().executeJs("document.querySelector('html').setAttribute('theme','dark');");
-                }
+        Icon moon = new Icon(VaadinIcon.MOON);
+        Icon sun = new Icon(VaadinIcon.SUN_O);
+        PaperToggleButton choiseTheme = new PaperToggleButton();
+        choiseTheme.addValueChangeListener(valueChangedEvent -> {
+            ThemeList themeList = UI.getCurrent().getElement().getThemeList();
+            if (valueChangedEvent.getValue()) {
+                themeList.remove(Lumo.LIGHT);
+                themeList.add(Lumo.DARK);
+                header.getThemeList().set("dark", true);
+            } else {
+                themeList.remove(Lumo.DARK);
+                themeList.add(Lumo.LIGHT);
+                header.getThemeList().set("dark", false);
             }
         });
-        HorizontalLayout horizontalLayout = new HorizontalLayout(label,theme);
+        HorizontalLayout horizontalLayout = new HorizontalLayout(sun,choiseTheme,moon);
         horizontalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
         addToNavbar(horizontalLayout,logoutButton);
     }
