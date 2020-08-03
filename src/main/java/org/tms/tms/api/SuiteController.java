@@ -5,10 +5,12 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.tms.tms.dao.Suite;
+import org.tms.tms.dto.SuiteChild;
 import org.tms.tms.dto.SuiteDto;
 import org.tms.tms.services.SuiteService;
 
 import java.util.Collection;
+import java.util.List;
 
 @RestController
 @RequestMapping("/api")
@@ -30,13 +32,13 @@ public class SuiteController {
     @Operation(summary = "Get all Suites in Project", description = "Return all Suites in Project", tags = { "Suite" })
     @GetMapping(value = "/suites/{projectId}")
     public Collection<Suite> getAllSuitesByProject(@PathVariable Long projectId) {
-        return suiteService.getAllSuiteByProject(projectId);
+        return suiteService.getAllSuitesByProject(projectId);
     }
 
     @Operation(summary = "Get all Child Suites in Suite", description = "Return all Child Suites in Suite", tags = { "Suite" })
     @GetMapping(value = "/childAllSuites/{suiteId}")
     public Collection<Suite> getAllChildSuiteBySuite(@PathVariable Long suiteId) {
-        return suiteService.getAllChildSuiteBySuite(suiteId);
+        return suiteService.getAllChildSuitesBySuite(suiteId);
     }
 
     @Operation(summary = "Get Child Suites in Suite", description = "Return Child Suites in Suite", tags = { "Suite" })
@@ -64,6 +66,12 @@ public class SuiteController {
     @DeleteMapping(value = "/suite/{suiteId}")
     public void deleteSuite(@PathVariable Long suiteId) {
         suiteService.deleteSuite(suiteId);
+    }
+
+    @Operation(summary = "Get Hierarchy Suites in Project", description = "Return Hierarchy Suites in Project", tags = { "Suite" })
+    @GetMapping(value = "/suitesHierarchy/{projectId}")
+    public List<SuiteChild> getSuiteHierarchy(@PathVariable Long projectId){
+        return suiteService.suiteChild(projectId);
     }
 
 }

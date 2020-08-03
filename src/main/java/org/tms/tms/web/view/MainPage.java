@@ -7,6 +7,7 @@ import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
@@ -14,14 +15,19 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
+import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.dom.ThemeList;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.PWA;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
+import lombok.SneakyThrows;
 import org.tms.tms.authentication.AccessControl;
 import org.tms.tms.authentication.AccessControlFactory;
 
@@ -31,21 +37,23 @@ import java.util.Optional;
 /**
  * The main view is a top-level placeholder for other views.
  */
-//@JsModule("./styles/shared-styles.js")
 @CssImport("./styles/views/main/main-view.css")
+@CssImport("./styles/shared-styles.css")
 @Theme(value = Lumo.class)
 @PWA(name = "TMS", shortName = "TMS", enableInstallPrompt = false)
 @PageTitle("TMS")
 @Route("")
-public class MainPage extends AppLayout implements RouterLayout {
+public class MainPage extends AppLayout {
 
     private final Tabs menu;
     private H1 viewTitle;
     private Button logoutButton;
     private HorizontalLayout header;
+    private Component headerContent;
 
     public MainPage() {
         setPrimarySection(Section.DRAWER);
+        headerContent = createHeaderContent();
         addToNavbar(true, createHeaderContent());
         menu = createMenu();
         addToDrawer(createDrawerContent(menu));
@@ -56,7 +64,7 @@ public class MainPage extends AppLayout implements RouterLayout {
         header.setId("header");
         header.setWidthFull();
         header.setSpacing(false);
-        header.getThemeList().set("dark", true);
+        //header.getThemeList().set("dark", true);
         header.setAlignItems(FlexComponent.Alignment.CENTER);
         header.add(new DrawerToggle());
         viewTitle = new H1();
@@ -129,10 +137,25 @@ public class MainPage extends AppLayout implements RouterLayout {
                 .anyMatch(currentRoute::equals);
     }
 
-    private String getCurrentPageTitle() {
-        return getContent().getClass().getAnnotation(PageTitle.class).value();
+    @SneakyThrows
+    private String getCurrentPageTitle()  {
+        PageTitle pageTitle = getContent().getClass().getAnnotation(PageTitle.class);
+        if (pageTitle==null){
+            /*PendingJavaScriptResult scriptResult = UI.getCurrent().getPage().executeJs("return document.title");
+            scriptResult.then(String.class,response->{
+                setTitle(response);
+            });
+            return this.title;*/
+            return "";
+        }
+        else return getContent().getClass().getAnnotation(PageTitle.class).value();
     }
 
+    private void setTitle(String title){
+        this.title = title;
+    }
+
+    private String title = "";
 
     private Button createMenuButton(String caption, Icon icon) {
         final Button routerButton = new Button(caption);
@@ -165,10 +188,11 @@ public class MainPage extends AppLayout implements RouterLayout {
         // Finally, add logout button for all users
         Button label = new Button();
         label.setIcon(VaadinIcon.OPEN_BOOK.create());
+        label.getStyle().set("margin-left", "1em");
         label.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                UI.getCurrent().getPage().open("/swagger");
+                UI.getCurrent().getPage().open("swagger-ui.html");
             }
         });
         Icon moon = new Icon(VaadinIcon.MOON);
@@ -179,15 +203,23 @@ public class MainPage extends AppLayout implements RouterLayout {
             if (valueChangedEvent.getValue()) {
                 themeList.remove(Lumo.LIGHT);
                 themeList.add(Lumo.DARK);
-                header.getThemeList().set("dark", true);
+                headerContent.getElement().getThemeList().set("dark", true);
             } else {
                 themeList.remove(Lumo.DARK);
                 themeList.add(Lumo.LIGHT);
-                header.getThemeList().set("dark", false);
+                headerContent.getElement().getThemeList().set("dark", false);
             }
         });
         HorizontalLayout horizontalLayout = new HorizontalLayout(sun,choiseTheme,moon);
         horizontalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        addToNavbar(horizontalLayout,logoutButton);
+        addToNavbar(horizontalLayout,label,logoutButton);
+    }
+
+    public H1 getViewTitle() {
+        return viewTitle;
+    }
+
+    public void setViewTitle(H1 viewTitle) {
+        this.viewTitle = viewTitle;
     }
 }

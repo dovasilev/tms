@@ -112,3 +112,17 @@ body {
 .Discontinued {
     color: #f54993;
 }
+
+[role~="button"]:not([theme~="primary"]):not([theme~="tertiary-inline"]) {
+    background-color: transparent !important;
+}
+
+#del {
+    color: red;
+}
+
+#actions {
+   position: fixed;
+       bottom: 2em;
+       right: 2em;
+}

@@ -10,6 +10,5 @@ public class Step {
     private Integer number;
     private String action;
     private String expectedResult;
-    private String actualResult;
 
 }

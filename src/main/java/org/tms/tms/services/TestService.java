@@ -44,7 +44,7 @@ public class TestService {
     public List<Test> getAllAndChildBySuiteId(Long id) {
         List<Long> ids = new ArrayList<>();
         ids.add(id);
-        suiteService.getAllChildSuiteBySuite(id).stream().forEach(x -> ids.add(x.getId()));
+        suiteService.getAllChildSuitesBySuite(id).stream().forEach(x -> ids.add(x.getId()));
         return testRepo.findAllTestsBySuites(ids);
     }
 
