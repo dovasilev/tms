@@ -1,5 +1,6 @@
 package org.tms.tms;
 
+import com.vaadin.flow.component.page.LoadingIndicatorConfiguration;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import org.springframework.boot.SpringApplication;
@@ -34,6 +35,13 @@ public class TmsApplication extends SpringBootServletInitializer implements Vaad
 						.equals(enterEvent.getNavigationTarget()))
 					enterEvent.rerouteTo(LoginPage.class);
 			});
+		});
+
+		initEvent.getSource().addUIInitListener(uiInitEvent -> {
+			LoadingIndicatorConfiguration conf = uiInitEvent.getUI().getLoadingIndicatorConfiguration();
+
+			// disable default theme -> loading indicator will not be shown
+			conf.setApplyDefaultTheme(true);
 		});
 	}
 

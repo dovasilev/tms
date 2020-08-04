@@ -39,6 +39,7 @@ public class ProjectsView extends VerticalLayout {
         this.projectController = projectController;
         this.suiteController = suiteController;
         this.testController = testController;
+        setSizeFull();
         add(createProjectButton());
         grid();
     }
@@ -47,7 +48,8 @@ public class ProjectsView extends VerticalLayout {
         projectGrid = new GridCrud<>(Project.class);
         projectGrid.getGrid().getStyle().set("border","none");
         projectGrid.setSizeFull();
-        projectGrid.getGrid().setColumns("title", "description");
+        projectGrid.getGrid().setColumns("id","title", "description");
+        projectGrid.getGrid().getColumnByKey("id").setWidth("75px").setFlexGrow(0);
         projectGrid.getGrid().addComponentColumn(project -> {
             return createEditButton(project);
         });

@@ -2,7 +2,6 @@ package org.tms.tms.web.components;
 
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
-import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -20,7 +19,7 @@ import org.tms.tms.api.SuiteController;
 import org.tms.tms.api.TestController;
 import org.tms.tms.dao.Step;
 import org.tms.tms.dao.Steps;
-import org.tms.tms.dto.SuiteDto;
+import org.tms.tms.dao.Test;
 import org.tms.tms.dto.TestDto;
 import org.tms.tms.web.converters.ConvertSuiteDivToSuiteDto;
 import org.tms.tms.web.view.ProjectView;
@@ -32,70 +31,104 @@ import java.util.List;
 import java.util.Map;
 
 @CssImport("./styles/shared-styles.css")
-public class CreateTestComponent extends Dialog {
+public class EditTestComponent extends Dialog {
 
     private VerticalLayout verticalStep = new VerticalLayout();
     private Binder<TestDto> binder;
     private TestDto testDto;
-    int i = 1;
+    int nextStep = 1;
     private HorizontalLayout action;
     Select<ProjectView.SuiteDiv> select;
     TestController testController;
+    SuiteController suiteController;
     private HorizontalLayout hor;
-    private Map<Step,Binder> stepBinderMap;
+    private Map<Step, Binder> stepBinderMap;
     Runnable actionClose;
 
-    public CreateTestComponent(Long projectId, SuiteController suiteController, TestController testController, Runnable actionClose) {
+    private Test test;
+
+    /**
+     * @param test
+     * @param suiteController
+     * @param testController
+     * @param actionClose
+     */
+    public EditTestComponent(Test test, SuiteController suiteController, TestController testController, Runnable actionClose) {
+        this.test = test;
+        this.suiteController = suiteController;
+        this.testController = testController;
         this.actionClose = actionClose;
         this.stepBinderMap = new LinkedHashMap<>();
         setSizeFull();
-        setAriaLabel("Создание теста");
-        getElement().getStyle().set("scrolling","auto");
-        this.testController = testController;
+        setAriaLabel("Изменение теста");
+        getElement().getStyle().set("scrolling", "auto");
         testDto = new TestDto();
+        testDto.setTitle(test.getTitle());
+        testDto.setDescription(test.getDescription());
+        testDto.setStatus(test.getStatus());
+        testDto.setSuiteId(test.getSuiteId().getId());
+        testDto.setProjectId(test.getProjectId().getId());
+        testDto.setAutomated(test.getAutomated());
+        testDto.setSteps(test.getSteps());
         binder = new Binder<>();
         VerticalLayout content = new VerticalLayout();
         TextField title = new TextField("Название");
         title.setRequired(true);
         binder.forField(title)
-                .withValidator(new StringLengthValidator("Заполните поле",1,200))
+                .withValidator(new StringLengthValidator("Заполните поле", 1, 200))
                 .bind(TestDto::getTitle, TestDto::setTitle);
         TextField description = new TextField("Описание");
         binder.forField(description).bind(TestDto::getDescription, TestDto::setDescription);
-        testDto.setProjectId(projectId);
+        testDto.setProjectId(test.getProjectId().getId());
         select = new Select<>();
         select.setRequiredIndicatorVisible(true);
         select.setLabel("Родительский сьют");
         List<ProjectView.SuiteDiv> suiteList = new LinkedList<>();
-        suiteController.getAllSuitesByProject(projectId)
+        suiteController.getAllSuitesByProject(test.getProjectId().getId())
                 .forEach(x -> {
                     suiteList.add(new ProjectView.SuiteDiv(x));
                 });
         select.setItemLabelGenerator(ProjectView.SuiteDiv::getAllTitle);
         select.setItems(suiteList);
-        binder.forField(select).withConverter(new ConvertSuiteDivToSuiteDto()).asRequired().bind(TestDto::getSuiteId,TestDto::setSuiteId);
+        binder.forField(select).withConverter(new ConvertSuiteDivToSuiteDto()).asRequired().bind(TestDto::getSuiteId, TestDto::setSuiteId);
         Checkbox isAutomated = new Checkbox();
         isAutomated.setLabel("Автоматизирон");
-        binder.forField(isAutomated).bind(TestDto::getAutomated,TestDto::setAutomated);
+        binder.forField(isAutomated).bind(TestDto::getAutomated, TestDto::setAutomated);
         TextField status = new TextField("Статус");
-        binder.forField(status).bind(TestDto::getStatus,TestDto::setStatus);
+        binder.forField(status).bind(TestDto::getStatus, TestDto::setStatus);
+        action = new HorizontalLayout();
+        Button createStep = new Button("Создать шаг");
+        action.add(createStep);
+        createStep.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                addStep();
+            }
+        });
         FormLayout gridLayout = new FormLayout();
         gridLayout.setWidthFull();
-        init();
-        gridLayout.add(select,0);
-        gridLayout.add(title,1);
-        gridLayout.add(description,3);
-        gridLayout.add(isAutomated,4);
-        gridLayout.add(status,5);
-        gridLayout.add(verticalStep,6);
-        gridLayout.add(action,7);
+        gridLayout.add(select, 0);
+        gridLayout.add(title, 1);
+        gridLayout.add(description, 3);
+        gridLayout.add(isAutomated, 4);
+        gridLayout.add(status, 5);
+        gridLayout.add(verticalStep, 6);
+        gridLayout.add(action, 7);
         content.add(gridLayout);
         add(content);
         cancelSave();
+        binder.setBean(testDto);
+        select.setValue(suiteList.stream().filter(x -> x.getId().equals(test.getSuiteId().getId())).findFirst().get());
+        testDto.getSteps().getSteps().forEach(step -> {
+            renderStep(step);
+        });
+        stepBinderMap.forEach((step, binder1) -> {
+            binder1.setBean(step);
+        });
         open();
     }
 
-    private void cancelSave(){
+    private void cancelSave() {
         Button cancel = new Button("Отмена");
         Button save = new Button("Сохранить");
         save.setIcon(VaadinIcon.PENCIL.create());
@@ -107,19 +140,16 @@ public class CreateTestComponent extends Dialog {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 List<Step> steps = new LinkedList<>();
-                for (Map.Entry<Step, Binder> entry:stepBinderMap.entrySet()){
+                for (Map.Entry<Step, Binder> entry : stepBinderMap.entrySet()) {
                     entry.getValue().validate();
-                    if (entry.getValue().writeBeanIfValid(entry.getKey())){
+                    if (entry.getValue().writeBeanIfValid(entry.getKey())) {
                         steps.add(entry.getKey());
                     }
                 }
                 testDto.setSteps(new Steps(steps));
                 binder.validate();
                 if (binder.writeBeanIfValid(testDto)) {
-                    /*if (select.getValue() != null) {
-                        testDto.setSuiteId(select.getValue().getId());
-                    }*/
-                    testController.addTest(testDto);
+                    testController.updateTest(test.getId(),testDto);
                     close();
                     actionClose.run();
                 }
@@ -129,27 +159,15 @@ public class CreateTestComponent extends Dialog {
         hor.add(cancel, save);
         hor.setId("actions");
         add(hor);
-
     }
 
-    private void init() {
-        action = new HorizontalLayout();
-        Button createStep = new Button("Создать шаг");
-        action.add(createStep);
-        createStep.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                addStep();
-            }
-        });
-    }
 
-    private void addStep(){
-        Step step = new Step();
-        step.setNumber(i);
+
+
+    private void renderStep(Step step){
         Binder<Step> stepBinder = new Binder<>();
         VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.add(new Label("Шаг № "+i));
+        verticalLayout.add(new Label("Шаг № "+step.getNumber()));
         verticalLayout.getStyle().set("border","1px solid #e5e5e5");
         HorizontalLayout name = new HorizontalLayout();
         name.setWidthFull();
@@ -170,10 +188,42 @@ public class CreateTestComponent extends Dialog {
         stepBinder.forField(action.getInput()).bind(Step::getAction,Step::setAction);
         stepBinder.forField(result.getInput()).bind(Step::getExpectedResult,Step::setExpectedResult);
         stepBinderMap.put(step,stepBinder);
-        i++;
+        nextStep = step.getNumber()+1;
         verticalLayout.add(horizontalLayout);
         add(verticalLayout);
         add(this.action);
-        init();
     }
+
+    private void addStep(){
+        Step step = new Step();
+        step.setNumber(nextStep);
+        Binder<Step> stepBinder = new Binder<>();
+        VerticalLayout verticalLayout = new VerticalLayout();
+        verticalLayout.add(new Label("Шаг № "+ nextStep));
+        verticalLayout.getStyle().set("border","1px solid #e5e5e5");
+        HorizontalLayout name = new HorizontalLayout();
+        name.setWidthFull();
+        Label nameAction = new Label("Действие");
+        nameAction.getElement().getStyle().set("width","50%");
+        Label nameResult = new Label("Ожидаемый результат");
+        nameResult.getElement().getStyle().set("width","50%");
+        name.add(nameAction,nameResult);
+        verticalLayout.add(name);
+        HorizontalLayout horizontalLayout = new HorizontalLayout();
+        horizontalLayout.setWidthFull();
+        MarkdownArea action = new MarkdownArea();
+        action.getElement().getStyle().set("width","50%");
+        MarkdownArea result = new MarkdownArea();
+        result.getElement().getStyle().set("width","50%");
+        horizontalLayout.add(action);
+        horizontalLayout.add(result);
+        stepBinder.forField(action.getInput()).bind(Step::getAction,Step::setAction);
+        stepBinder.forField(result.getInput()).bind(Step::getExpectedResult,Step::setExpectedResult);
+        stepBinderMap.put(step,stepBinder);
+        nextStep++;
+        verticalLayout.add(horizontalLayout);
+        add(verticalLayout);
+        add(this.action);
+    }
+
 }

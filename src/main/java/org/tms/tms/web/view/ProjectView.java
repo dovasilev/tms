@@ -18,6 +18,9 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.select.Select;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.binder.Result;
+import com.vaadin.flow.data.binder.ValueContext;
+import com.vaadin.flow.data.converter.Converter;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import lombok.Data;
@@ -28,6 +31,7 @@ import org.tms.tms.dao.*;
 import org.tms.tms.dto.SuiteChild;
 import org.tms.tms.dto.SuiteDto;
 import org.tms.tms.web.components.CreateTestComponent;
+import org.tms.tms.web.components.EditTestComponent;
 import org.vaadin.flow.helper.HasUrlParameterMapping;
 import org.vaadin.flow.helper.UrlParameter;
 import org.vaadin.flow.helper.UrlParameterMapping;
@@ -104,7 +108,9 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
         List<Test> tests = allTest.stream().filter(x -> x.getSuiteId().getId().equals(parentSuite.getSuite().getId())).collect(Collectors.toList());
         tests.forEach(test -> {
             HorizontalLayout testDiv = new HorizontalLayout();
-            testDiv.add(new H4(test.getTitle()));
+            H4 titleTest = new H4(test.getTitle());
+            titleTest.getStyle().set("margin-top","auto");
+            testDiv.add(titleTest,actionsTest(test));
             listBox.add(testDiv);
         });
         if (!tests.isEmpty()) {
@@ -200,9 +206,10 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
         createTest.setIcon(VaadinIcon.PLUS_CIRCLE.create());
         createTest.setText("Создать тест");
         createTest.addClickListener(buttonClickEvent -> {
-            CreateTestComponent createTestComponent = new CreateTestComponent(projectId,suiteController,testController);
-            createTestComponent.open();
-            init();
+            CreateTestComponent createTestComponent = new CreateTestComponent(projectId,suiteController,testController,
+                    () -> {
+                        init();
+                    });
         });
         return createTest;
     }
@@ -252,11 +259,6 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
             allSuites.forEach(x -> {
                 suiteList.add(new SuiteDiv(x));
             });
-            List<SuiteDiv> remove = new LinkedList<>();
-            suite.getAllChildren().forEach(x -> {
-                remove.add(new SuiteDiv(x));
-            });
-            remove.add(new SuiteDiv(suite.getSuite()));
             suiteList.removeIf(suiteDiv -> suiteDiv.getId().equals(suite.getSuite().getId()));
             suite.getAllChildren().forEach(x -> {
                 suiteList.removeIf(suiteDiv -> suiteDiv.getId().equals(x.getId()));
@@ -304,6 +306,45 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
         return createSuite;
     }
 
+
+
+    private HorizontalLayout actionsTest(Test test) {
+        HorizontalLayout actions = new HorizontalLayout();
+        Button del = new Button("Удалить");
+        del.setIcon(VaadinIcon.TRASH.create());
+        del.setId("del");
+        del.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
+            @Override
+            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
+                ConfirmDialog confirmDialog = new ConfirmDialog(
+                        "Вы уверены что хотите удалить Тест: " + test.getTitle() + " ?",
+                        "",
+                        "Удалить",
+                        () -> {
+                            testController.deleteTest(test.getId());
+                            init();
+                        });
+                confirmDialog.open();
+            }
+        });
+        actions.add(editTestButton(test),del);
+        return actions;
+    }
+
+    private Button editTestButton(Test test) {
+        Button editTest = new Button();
+        editTest.setIcon(VaadinIcon.EDIT.create());
+        editTest.setText("Изменить");
+        editTest.addClickListener(buttonClickEvent -> {
+            EditTestComponent editTestComponent = new EditTestComponent(test,suiteController,testController,() -> {
+                init();
+            });
+        });
+        return editTest;
+    }
+
+
+
     @Data
     public static class SuiteDiv {
 
@@ -347,4 +388,5 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
         }
 
     }
+
 }
