@@ -179,11 +179,11 @@ public class MainPage extends AppLayout {
                 KeyModifier.CONTROL);
 
         // add the admin view menu item if user has admin role
-        final AccessControl accessControl = AccessControlFactory.getInstance()
+       /* final AccessControl accessControl = AccessControlFactory.getInstance()
                 .createAccessControl();
         if (accessControl.isUserInRole(AccessControl.ADMIN_ROLE_NAME)) {
 
-        }
+        }*/
 
         // Finally, add logout button for all users
         Button label = new Button();

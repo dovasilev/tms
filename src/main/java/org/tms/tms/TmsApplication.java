@@ -1,20 +1,21 @@
 package org.tms.tms;
 
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.page.LoadingIndicatorConfiguration;
+import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
+import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
-import org.tms.tms.authentication.AccessControl;
-import org.tms.tms.authentication.AccessControlFactory;
+import org.tms.tms.security.SecurityUtils;
 import org.tms.tms.web.view.LoginPage;
 
-@SpringBootApplication
+@SpringBootApplication(exclude = ErrorMvcAutoConfiguration.class)
 @ComponentScan({"org.tms.tms*"})
 @EntityScan("org.tms.tms*")
 @EnableJpaRepositories("org.tms.tms*")
@@ -26,15 +27,12 @@ public class TmsApplication extends SpringBootServletInitializer implements Vaad
 
 	@Override
 	public void serviceInit(ServiceInitEvent initEvent) {
-		final AccessControl accessControl = AccessControlFactory.getInstance()
-				.createAccessControl();
+		/*final AccessControl accessControl = AccessControlFactory.getInstance()
+				.createAccessControl();*/
 
-		initEvent.getSource().addUIInitListener(uiInitEvent -> {
-			uiInitEvent.getUI().addBeforeEnterListener(enterEvent -> {
-				if (!accessControl.isUserSignedIn() && !LoginPage.class
-						.equals(enterEvent.getNavigationTarget()))
-					enterEvent.rerouteTo(LoginPage.class);
-			});
+		initEvent.getSource().addUIInitListener(uiEvent -> {
+			final UI ui = uiEvent.getUI();
+			ui.addBeforeEnterListener(this::beforeEnter);
 		});
 
 		initEvent.getSource().addUIInitListener(uiInitEvent -> {
@@ -44,5 +42,14 @@ public class TmsApplication extends SpringBootServletInitializer implements Vaad
 			conf.setApplyDefaultTheme(true);
 		});
 	}
+
+	private void beforeEnter(BeforeEnterEvent event) {
+		if (!LoginPage.class.equals(event.getNavigationTarget())
+				&& !SecurityUtils.isUserLoggedIn()) {
+			event.rerouteTo(LoginPage.class);
+		}
+	}
+
+	
 
 }

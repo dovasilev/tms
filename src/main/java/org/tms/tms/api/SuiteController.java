@@ -18,10 +18,10 @@ import java.util.List;
 public class SuiteController {
 
     private SuiteService suiteService;
-
     public SuiteController(SuiteService suiteService) {
         this.suiteService = suiteService;
     }
+
 
     @Operation(summary = "Get Suite", description = "Return Suite", tags = { "Suite" })
     @GetMapping(value = "/suite/{suiteId}")

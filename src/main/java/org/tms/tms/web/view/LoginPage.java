@@ -1,6 +1,7 @@
 package org.tms.tms.web.view;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Span;
@@ -10,8 +11,17 @@ import com.vaadin.flow.component.orderedlayout.FlexLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.tms.tms.authentication.AccessControl;
-import org.tms.tms.authentication.AccessControlFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.tms.tms.security.CustomRequestCache;
+import org.tms.tms.security.SecurityConfiguration;
 
 /**
  * UI content when the user is not logged in yet.
@@ -21,10 +31,16 @@ import org.tms.tms.authentication.AccessControlFactory;
 @CssImport("./styles/shared-styles.css")
 public class LoginPage extends FlexLayout {
 
-    private AccessControl accessControl;
+    public static final String ROUTE = "login";
+    AuthenticationManager authenticationManager;
+    CustomRequestCache requestCache;
 
-    public LoginPage() {
-        accessControl = AccessControlFactory.getInstance().createAccessControl();
+
+    @Autowired
+    public LoginPage(AuthenticationManager authenticationManager, //
+                     CustomRequestCache requestCache) {
+        this.authenticationManager = authenticationManager;
+        this.requestCache  = requestCache;
         buildUI();
     }
 
@@ -70,10 +86,29 @@ public class LoginPage extends FlexLayout {
     }
 
     private void login(LoginForm.LoginEvent event) {
-        if (accessControl.signIn(event.getUsername(), event.getPassword())) {
-            getUI().get().navigate("");
+        /*if (accessControl.signIn(event.getUsername(), event.getPassword())) {
+            UI.getCurrent().navigate(MainPage.class);
         } else {
             event.getSource().setError(true);
+        }*/
+
+        try {
+            // try to authenticate with given credentials, should always return not null or throw an {@link AuthenticationException}
+            final Authentication authentication = authenticationManager
+                    .authenticate(new UsernamePasswordAuthenticationToken(event.getUsername(), event.getPassword())); //
+
+            // if authentication was successful we will update the security context and redirect to the page requested first
+            SecurityContextHolder.getContext().setAuthentication(authentication); //
+            UI.getCurrent().navigate(requestCache.resolveRedirectUrl()); //
+
+        } catch (AuthenticationException ex) { //
+            // show default error message
+            // Note: You should not expose any detailed information here like "username is known but password is wrong"
+            // as it weakens security.
+            //login.setError(true);
+            event.getSource().setError(true);
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }
