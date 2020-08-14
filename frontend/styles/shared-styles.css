@@ -128,6 +128,10 @@ body {
        z-index: 1;
 }
 
+#scroll {
+   justify-content: center;
+}
+
 
 .v-loading-indicator {
   position: fixed; /* Occupy whole screen even if scrolled */

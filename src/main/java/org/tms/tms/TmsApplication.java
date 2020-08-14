@@ -5,15 +5,20 @@ import com.vaadin.flow.component.page.LoadingIndicatorConfiguration;
 import com.vaadin.flow.router.BeforeEnterEvent;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
+import com.vaadin.flow.server.startup.VaadinAppShellInitializer;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
 import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.tms.tms.security.SecurityUtils;
 import org.tms.tms.web.view.LoginPage;
+import org.tms.tms.web.view.MainPage;
+import org.tms.tms.web.view.SignInView;
+import org.tms.tms.web.view.SignUpView;
 
 @SpringBootApplication(exclude = ErrorMvcAutoConfiguration.class)
 @ComponentScan({"org.tms.tms*"})
@@ -29,7 +34,6 @@ public class TmsApplication extends SpringBootServletInitializer implements Vaad
 	public void serviceInit(ServiceInitEvent initEvent) {
 		/*final AccessControl accessControl = AccessControlFactory.getInstance()
 				.createAccessControl();*/
-
 		initEvent.getSource().addUIInitListener(uiEvent -> {
 			final UI ui = uiEvent.getUI();
 			ui.addBeforeEnterListener(this::beforeEnter);
@@ -44,12 +48,20 @@ public class TmsApplication extends SpringBootServletInitializer implements Vaad
 	}
 
 	private void beforeEnter(BeforeEnterEvent event) {
-		if (!LoginPage.class.equals(event.getNavigationTarget())
-				&& !SecurityUtils.isUserLoggedIn()) {
-			event.rerouteTo(LoginPage.class);
-		}
-	}
+		if (LoginPage.class.equals(event.getNavigationTarget())&& SecurityUtils.isUserLoggedIn()){
 
+		}
+		else if (SignInView.class.equals(event.getNavigationTarget())&& !SecurityUtils.isUserLoggedIn()){
+			event.rerouteTo(SignInView.class);
+		}
+		else if (SignUpView.class.equals(event.getNavigationTarget())&& !SecurityUtils.isUserLoggedIn()){
+			event.rerouteTo(SignUpView.class);
+		}
+		else if (SecurityUtils.isUserLoggedIn() && !SignInView.class.equals(event.getNavigationTarget())){
+
+		}
+		else event.rerouteTo(LoginPage.class);
+	}
 	
 
 }

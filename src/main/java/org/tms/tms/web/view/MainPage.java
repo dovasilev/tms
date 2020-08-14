@@ -1,13 +1,11 @@
 package org.tms.tms.web.view;
 
-import com.gmail.umit.PaperToggleButton;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
-import com.vaadin.flow.component.dependency.JsModule;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
@@ -15,21 +13,19 @@ import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.page.PendingJavaScriptResult;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
-import com.vaadin.flow.dom.ThemeList;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLink;
-import com.vaadin.flow.server.PWA;
+import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 import lombok.SneakyThrows;
-import org.tms.tms.authentication.AccessControl;
 import org.tms.tms.authentication.AccessControlFactory;
+import org.tms.tms.web.components.ChangeThemeComponent;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -40,7 +36,6 @@ import java.util.Optional;
 @CssImport("./styles/views/main/main-view.css")
 @CssImport("./styles/shared-styles.css")
 @Theme(value = Lumo.class)
-@PWA(name = "TMS", shortName = "TMS", enableInstallPrompt = false)
 @PageTitle("TMS")
 @Route("")
 public class MainPage extends AppLayout {
@@ -50,6 +45,7 @@ public class MainPage extends AppLayout {
     private Button logoutButton;
     private HorizontalLayout header;
     private Component headerContent;
+
 
     public MainPage() {
         setPrimarySection(Section.DRAWER);
@@ -141,11 +137,6 @@ public class MainPage extends AppLayout {
     private String getCurrentPageTitle()  {
         PageTitle pageTitle = getContent().getClass().getAnnotation(PageTitle.class);
         if (pageTitle==null){
-            /*PendingJavaScriptResult scriptResult = UI.getCurrent().getPage().executeJs("return document.title");
-            scriptResult.then(String.class,response->{
-                setTitle(response);
-            });
-            return this.title;*/
             return "";
         }
         else return getContent().getClass().getAnnotation(PageTitle.class).value();
@@ -167,7 +158,8 @@ public class MainPage extends AppLayout {
     }
 
     private void logout() {
-        AccessControlFactory.getInstance().createAccessControl().signOut();
+        VaadinSession.getCurrent().getSession().invalidate();
+        UI.getCurrent().navigate("");
     }
 
     @Override
@@ -179,13 +171,6 @@ public class MainPage extends AppLayout {
                 KeyModifier.CONTROL);
 
         // add the admin view menu item if user has admin role
-       /* final AccessControl accessControl = AccessControlFactory.getInstance()
-                .createAccessControl();
-        if (accessControl.isUserInRole(AccessControl.ADMIN_ROLE_NAME)) {
-
-        }*/
-
-        // Finally, add logout button for all users
         Button label = new Button();
         label.setIcon(VaadinIcon.OPEN_BOOK.create());
         label.getStyle().set("margin-left", "1em");
@@ -195,24 +180,8 @@ public class MainPage extends AppLayout {
                 UI.getCurrent().getPage().open("swagger-ui.html");
             }
         });
-        Icon moon = new Icon(VaadinIcon.MOON);
-        Icon sun = new Icon(VaadinIcon.SUN_O);
-        PaperToggleButton choiseTheme = new PaperToggleButton();
-        choiseTheme.addValueChangeListener(valueChangedEvent -> {
-            ThemeList themeList = UI.getCurrent().getElement().getThemeList();
-            if (valueChangedEvent.getValue()) {
-                themeList.remove(Lumo.LIGHT);
-                themeList.add(Lumo.DARK);
-                headerContent.getElement().getThemeList().set("dark", true);
-            } else {
-                themeList.remove(Lumo.DARK);
-                themeList.add(Lumo.LIGHT);
-                headerContent.getElement().getThemeList().set("dark", false);
-            }
-        });
-        HorizontalLayout horizontalLayout = new HorizontalLayout(sun,choiseTheme,moon);
-        horizontalLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        addToNavbar(horizontalLayout,label,logoutButton);
+        ChangeThemeComponent changeThemeComponent = new ChangeThemeComponent(headerContent);
+        addToNavbar(changeThemeComponent,label,logoutButton);
     }
 
     public H1 getViewTitle() {
@@ -222,4 +191,9 @@ public class MainPage extends AppLayout {
     public void setViewTitle(H1 viewTitle) {
         this.viewTitle = viewTitle;
     }
+
+
+
+
+
 }
