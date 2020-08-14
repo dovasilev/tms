@@ -29,7 +29,7 @@ public class LoginPage extends VerticalLayout implements RouterLayout, BeforeEnt
     public LoginPage() {
         setSizeFull();
         setClassName("login-screen");
-        getStyle().set("margin-top","10%");
+        getStyle().set("padding-top","10%");
         init();
 
     }
