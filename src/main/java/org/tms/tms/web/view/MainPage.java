@@ -46,7 +46,6 @@ public class MainPage extends AppLayout {
     private HorizontalLayout header;
     private Component headerContent;
 
-
     public MainPage() {
         setPrimarySection(Section.DRAWER);
         headerContent = createHeaderContent();
@@ -159,7 +158,7 @@ public class MainPage extends AppLayout {
 
     private void logout() {
         VaadinSession.getCurrent().getSession().invalidate();
-        UI.getCurrent().navigate("");
+        UI.getCurrent().navigate(LoginPage.class);
     }
 
     @Override

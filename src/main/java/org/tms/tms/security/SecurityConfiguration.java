@@ -60,15 +60,14 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 // Allow all requests by logged in users.
                 .anyRequest().authenticated()
-
-                // Configure the login page.
-                .and().formLogin().loginPage(LOGIN_URL).permitAll().loginProcessingUrl(LOGIN_PROCESSING_URL)
-                .and().formLogin().loginPage(SIGN_IN_URL).permitAll().loginProcessingUrl(SIGN_IN_URL)
-                .and().formLogin().loginPage(SIGN_UP_URL).permitAll().loginProcessingUrl(SIGN_UP_URL)
+                .and().formLogin().loginPage(LOGIN_URL).permitAll()
+                .loginProcessingUrl(SIGN_IN_URL)
+                .loginProcessingUrl(SIGN_UP_URL)
                 .failureUrl(LOGIN_FAILURE_URL)
 
                 // Configure logout
                 .and().logout().logoutSuccessUrl(LOGOUT_SUCCESS_URL);
+
     }
 
     @Bean

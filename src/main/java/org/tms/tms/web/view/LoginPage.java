@@ -1,6 +1,7 @@
 package org.tms.tms.web.view;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.FlexLayout;
@@ -9,10 +10,13 @@ import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.internal.AfterNavigationHandler;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
+import org.vaadin.flow.helper.UrlParameterMapping;
 
 import java.util.Arrays;
+import java.util.Optional;
 
 /**
  * UI content when the user is not logged in yet.
@@ -21,7 +25,7 @@ import java.util.Arrays;
 @PageTitle("Login")
 @CssImport("./styles/shared-styles.css")
 @Theme(Lumo.class)
-public class LoginPage extends VerticalLayout implements RouterLayout, BeforeEnterObserver {
+public class LoginPage extends VerticalLayout implements RouterLayout, BeforeEnterObserver, AfterNavigationObserver {
 
     public static final String ROUTE = "login";
     private Tabs tabs;
@@ -69,8 +73,37 @@ public class LoginPage extends VerticalLayout implements RouterLayout, BeforeEnt
 
     @Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-        if (LoginPage.class.equals(beforeEnterEvent.getNavigationTarget()))
+        if (SignUpView.class.equals(beforeEnterEvent.getNavigationTarget())){
+            beforeEnterEvent.rerouteTo(SignUpView.class);
+        }
+        else if (SignUpView.class.equals(beforeEnterEvent.getNavigationTarget())){
             beforeEnterEvent.rerouteTo(SignInView.class);
+        }
+    }
+
+
+    private void selectTab(Router router,Location location) {
+        RoutePrefix routePrefix = UI.getCurrent().getClass().getAnnotation(RoutePrefix.class);
+        if (routePrefix!=null) {
+            Optional<Component> tabToSelect = tabs.getChildren().filter(tab -> {
+                Component child = tab.getChildren().findFirst().get();
+                return child instanceof RouterLink && routePrefix.value().equals(((RouterLink) child).getHref());
+            }).findFirst();
+            tabToSelect.ifPresent(tab -> tabs.setSelectedTab((Tab) tab));
+        }
+        else {
+            String target = RouteConfiguration.forSessionScope().getUrl(router.resolveNavigationTarget(location).get().getNavigationTarget());
+            Optional<Component> tabToSelect = tabs.getChildren().filter(tab -> {
+                Component child = tab.getChildren().findFirst().get();
+                return child instanceof RouterLink && target.contains(((RouterLink) child).getHref());
+            }).findFirst();
+            tabToSelect.ifPresent(tab -> tabs.setSelectedTab((Tab) tab));
+        }
+    }
+
+    @Override
+    public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
+        selectTab(afterNavigationEvent.getSource(),afterNavigationEvent.getLocation());
     }
 
     /*@Override

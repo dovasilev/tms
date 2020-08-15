@@ -1,8 +1,13 @@
 package org.tms.tms;
 
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.UI;
+import com.vaadin.flow.component.internal.JavaScriptBootstrapUI;
 import com.vaadin.flow.component.page.LoadingIndicatorConfiguration;
 import com.vaadin.flow.router.BeforeEnterEvent;
+import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.router.RouteData;
+import com.vaadin.flow.server.RouteRegistry;
 import com.vaadin.flow.server.ServiceInitEvent;
 import com.vaadin.flow.server.VaadinServiceInitListener;
 import com.vaadin.flow.server.startup.VaadinAppShellInitializer;
@@ -15,10 +20,11 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.tms.tms.security.SecurityUtils;
-import org.tms.tms.web.view.LoginPage;
-import org.tms.tms.web.view.MainPage;
-import org.tms.tms.web.view.SignInView;
-import org.tms.tms.web.view.SignUpView;
+import org.tms.tms.web.view.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @SpringBootApplication(exclude = ErrorMvcAutoConfiguration.class)
 @ComponentScan({"org.tms.tms*"})
@@ -48,20 +54,23 @@ public class TmsApplication extends SpringBootServletInitializer implements Vaad
 	}
 
 	private void beforeEnter(BeforeEnterEvent event) {
-		if (LoginPage.class.equals(event.getNavigationTarget())&& SecurityUtils.isUserLoggedIn()){
-
-		}
-		else if (SignInView.class.equals(event.getNavigationTarget())&& !SecurityUtils.isUserLoggedIn()){
-			event.rerouteTo(SignInView.class);
-		}
-		else if (SignUpView.class.equals(event.getNavigationTarget())&& !SecurityUtils.isUserLoggedIn()){
-			event.rerouteTo(SignUpView.class);
-		}
-		else if (SecurityUtils.isUserLoggedIn() && !SignInView.class.equals(event.getNavigationTarget())){
-
-		}
-		else event.rerouteTo(LoginPage.class);
+			if (!isLoggedIn()) {
+				String target = event.getLocation().getPath().toLowerCase();
+				if (getPathView(SignUpView.class).equals(target)){
+					event.rerouteTo(SignUpView.class);
+				}
+				else if (getPathView(SignInView.class).equals(target)){
+					event.rerouteTo(SignInView.class);
+				}
+				else event.rerouteTo(SignInView.class);
+			}
 	}
-	
 
+	private boolean isLoggedIn(){
+		return SecurityUtils.isUserLoggedIn();
+	}
+
+	private String getPathView(Class<? extends Component> navigationTarget){
+		return RouteConfiguration.forSessionScope().getUrlBase(navigationTarget).get().toLowerCase();
+	}
 }

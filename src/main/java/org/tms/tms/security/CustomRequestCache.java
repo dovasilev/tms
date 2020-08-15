@@ -31,7 +31,10 @@ public class CustomRequestCache extends HttpSessionRequestCache {
         if(savedRequest instanceof DefaultSavedRequest) {
             final String requestURI = ((DefaultSavedRequest) savedRequest).getRequestURI(); //
             // check for valid URI and prevent redirecting to the login view
-            if (requestURI != null && !requestURI.isEmpty() && (!requestURI.contains(LoginPage.ROUTE)||!requestURI.contains("signIn"))) { //
+            if (requestURI != null && !requestURI.isEmpty()) { //
+                if (!requestURI.contains(LoginPage.ROUTE)
+                        && !requestURI.toLowerCase().contains("signin")
+                        && !requestURI.toLowerCase().contains("signup") )
                 return requestURI.startsWith("/") ? requestURI.substring(1) : requestURI; //
             }
         }
