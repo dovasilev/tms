@@ -25,7 +25,7 @@ import java.util.Optional;
 @PageTitle("Login")
 @CssImport("./styles/shared-styles.css")
 @Theme(Lumo.class)
-public class LoginPage extends VerticalLayout implements RouterLayout, BeforeEnterObserver, AfterNavigationObserver {
+public class LoginPage extends VerticalLayout implements RouterLayout, AfterNavigationObserver {
 
     public static final String ROUTE = "login";
     private Tabs tabs;
@@ -71,7 +71,7 @@ public class LoginPage extends VerticalLayout implements RouterLayout, BeforeEnt
         return tab;
     }
 
-    @Override
+    /*@Override
     public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
         if (SignUpView.class.equals(beforeEnterEvent.getNavigationTarget())){
             beforeEnterEvent.rerouteTo(SignUpView.class);
@@ -79,7 +79,7 @@ public class LoginPage extends VerticalLayout implements RouterLayout, BeforeEnt
         else if (SignUpView.class.equals(beforeEnterEvent.getNavigationTarget())){
             beforeEnterEvent.rerouteTo(SignInView.class);
         }
-    }
+    }*/
 
 
     private void selectTab(Router router,Location location) {
@@ -105,113 +105,4 @@ public class LoginPage extends VerticalLayout implements RouterLayout, BeforeEnt
     public void afterNavigation(AfterNavigationEvent afterNavigationEvent) {
         selectTab(afterNavigationEvent.getSource(),afterNavigationEvent.getLocation());
     }
-
-    /*@Override
-    public Element getElement() {
-        return UI.getCurrent().getElement();
-    }*/
-
-/*
-    private void buildUI() {
-        //setSizeFull();
-        //setClassName("login-screen");
-
-        // login form, centered in the available part of the screen
-        loginForm = new LoginForm();
-        loginForm.addLoginListener(this::login);
-        loginForm.addForgotPasswordListener(
-                event -> Notification.show("Hint: same as username"));
-
-        // layout to center login form when there is sufficient screen space
-        FlexLayout centeringLayout = new FlexLayout();
-        centeringLayout.setSizeFull();
-        centeringLayout.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
-        centeringLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        centeringLayout.add(createMenu(loginForm,registrationForm()));
-
-        //add(loginInformation);
-        ChangeThemeComponent changeThemeComponent = new ChangeThemeComponent(null);
-        //add(changeThemeComponent);
-        setContent(centeringLayout);
-    }
-
-    private Component registrationForm(){
-        FormLayout verticalLayout = new FormLayout();
-        verticalLayout.setSizeFull();
-        EmailField emailField = new EmailField("Email");
-        emailField.setRequiredIndicatorVisible(true);
-        TextField loginField = new TextField("Login");
-        loginField.setWidthFull();
-        loginField.setRequired(true);
-        TextField fullNameField = new TextField("FullName");
-        fullNameField.setWidthFull();
-        loginField.setRequired(true);
-        PasswordField passwordField = new PasswordField("Password");
-        passwordField.setWidthFull();
-        passwordField.setRequired(true);
-        PasswordField repeatPasswordField = new PasswordField("Repeat Password");
-        repeatPasswordField.setWidthFull();
-        repeatPasswordField.setRequired(true);
-        verticalLayout.add(emailField,loginField,fullNameField,passwordField,repeatPasswordField);
-        verticalLayout.getElement().setAttribute("part","vaadin-login-native-form");
-        return verticalLayout;
-    }
-
-    private Component createMenu(Component login, Component registration) {
-        Tab signIn = new Tab("Вход");
-        Tab signUp = new Tab("Регистрация");
-        Div divSignIn = new Div();
-        Div divSignUp = new Div();
-        divSignUp.setVisible(false);
-        VerticalLayout layoutSignIn = new VerticalLayout();
-        layoutSignIn.setSizeFull();
-        layoutSignIn.add(login);
-        divSignIn.add(layoutSignIn);
-
-        VerticalLayout layoutSignUp = new VerticalLayout();
-        layoutSignUp.setSizeFull();
-        layoutSignUp.add(registration);
-        divSignUp.add(layoutSignUp);
-
-        Map<Tab, Component> tabsToPages = new HashMap<>();
-        tabsToPages.put(signIn, divSignIn);
-        tabsToPages.put(signUp, divSignUp);
-        Tabs tabs = new Tabs(signIn,signUp);
-        tabs.setFlexGrowForEnclosedTabs(1);
-        tabs.getElement().getShadowRoot();
-        Div pages = new Div(divSignIn,divSignUp);
-        Set<Component> pagesShown = Stream.of(divSignIn)
-                .collect(Collectors.toSet());
-        tabs.addSelectedChangeListener(event -> {
-            pagesShown.forEach(page -> page.setVisible(false));
-            pagesShown.clear();
-            Component selectedPage = tabsToPages.get(tabs.getSelectedTab());
-            selectedPage.setVisible(true);
-            pagesShown.add(selectedPage);
-        });
-        Div all = new Div();
-        all.add(tabs,pages);
-        return all;
-    }
-
-    private void login(LoginForm.LoginEvent event) {
-        try {
-            // try to authenticate with given credentials, should always return not null or throw an {@link AuthenticationException}
-            final Authentication authentication = authenticationManager
-                    .authenticate(new UsernamePasswordAuthenticationToken(event.getUsername(), event.getPassword())); //
-
-            // if authentication was successful we will update the security context and redirect to the page requested first
-            SecurityContextHolder.getContext().setAuthentication(authentication); //
-            UI.getCurrent().navigate(requestCache.resolveRedirectUrl()); //
-
-        } catch (AuthenticationException ex) { //
-            // show default error message
-            // Note: You should not expose any detailed information here like "username is known but password is wrong"
-            // as it weakens security.
-            //login.setError(true);
-            event.getSource().setError(true);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }*/
 }

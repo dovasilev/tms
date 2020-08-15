@@ -2,9 +2,12 @@ package org.tms.tms.security;
 
 import com.vaadin.flow.server.HandlerHelper.RequestType;
 import com.vaadin.flow.shared.ApplicationConstants;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AnonymousAuthenticationToken;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.User;
 
 import javax.servlet.http.HttpServletRequest;
 import java.util.stream.Stream;
@@ -43,5 +46,13 @@ public final class SecurityUtils {
         return authentication != null
                 && !(authentication instanceof AnonymousAuthenticationToken)
                 && authentication.isAuthenticated();
+    }
+
+    public static User getLoggedUser(){
+        if (isUserLoggedIn()) {
+            User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+            return user;
+        }
+        else return null;
     }
 }

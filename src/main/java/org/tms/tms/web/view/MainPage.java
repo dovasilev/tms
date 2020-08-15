@@ -8,6 +8,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -24,7 +25,8 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 import lombok.SneakyThrows;
-import org.tms.tms.authentication.AccessControlFactory;
+import org.tms.tms.security.SecurityUtils;
+import org.tms.tms.security.UserService;
 import org.tms.tms.web.components.ChangeThemeComponent;
 
 import java.util.Arrays;
@@ -45,13 +47,15 @@ public class MainPage extends AppLayout {
     private Button logoutButton;
     private HorizontalLayout header;
     private Component headerContent;
+    private UserService userService;
 
-    public MainPage() {
+    public MainPage(UserService userService) {
         setPrimarySection(Section.DRAWER);
         headerContent = createHeaderContent();
         addToNavbar(true, createHeaderContent());
         menu = createMenu();
         addToDrawer(createDrawerContent(menu));
+        this.userService = userService;
     }
 
     private Component createHeaderContent() {
@@ -96,7 +100,7 @@ public class MainPage extends AppLayout {
     }
 
     private Component[] createMenuItems() {
-        RouterLink[] links = new RouterLink[] {
+        RouterLink[] links = new RouterLink[]{
                 new RouterLink("Проекты", ProjectsView.class)
         };
         return Arrays.stream(links).map(MainPage::createTab).toArray(Tab[]::new);
@@ -133,15 +137,14 @@ public class MainPage extends AppLayout {
     }
 
     @SneakyThrows
-    private String getCurrentPageTitle()  {
+    private String getCurrentPageTitle() {
         PageTitle pageTitle = getContent().getClass().getAnnotation(PageTitle.class);
-        if (pageTitle==null){
+        if (pageTitle == null) {
             return "";
-        }
-        else return getContent().getClass().getAnnotation(PageTitle.class).value();
+        } else return getContent().getClass().getAnnotation(PageTitle.class).value();
     }
 
-    private void setTitle(String title){
+    private void setTitle(String title) {
         this.title = title;
     }
 
@@ -172,7 +175,7 @@ public class MainPage extends AppLayout {
         // add the admin view menu item if user has admin role
         Button label = new Button();
         label.setIcon(VaadinIcon.OPEN_BOOK.create());
-        label.getStyle().set("margin-left", "1em");
+        label.getStyle().set("padding-left", "1em");
         label.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
@@ -180,19 +183,10 @@ public class MainPage extends AppLayout {
             }
         });
         ChangeThemeComponent changeThemeComponent = new ChangeThemeComponent(headerContent);
-        addToNavbar(changeThemeComponent,label,logoutButton);
+        Label fullName = new Label(userService.getUserByUsername(SecurityUtils.getLoggedUser().getUsername()).getFullName());
+        fullName.getStyle().set("padding-right", "1em");
+        addToNavbar(fullName, changeThemeComponent, label , logoutButton);
     }
-
-    public H1 getViewTitle() {
-        return viewTitle;
-    }
-
-    public void setViewTitle(H1 viewTitle) {
-        this.viewTitle = viewTitle;
-    }
-
-
-
 
 
 }
