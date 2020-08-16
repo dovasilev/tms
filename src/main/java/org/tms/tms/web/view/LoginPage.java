@@ -71,17 +71,6 @@ public class LoginPage extends VerticalLayout implements RouterLayout, AfterNavi
         return tab;
     }
 
-    /*@Override
-    public void beforeEnter(BeforeEnterEvent beforeEnterEvent) {
-        if (SignUpView.class.equals(beforeEnterEvent.getNavigationTarget())){
-            beforeEnterEvent.rerouteTo(SignUpView.class);
-        }
-        else if (SignUpView.class.equals(beforeEnterEvent.getNavigationTarget())){
-            beforeEnterEvent.rerouteTo(SignInView.class);
-        }
-    }*/
-
-
     private void selectTab(Router router,Location location) {
         RoutePrefix routePrefix = UI.getCurrent().getClass().getAnnotation(RoutePrefix.class);
         if (routePrefix!=null) {

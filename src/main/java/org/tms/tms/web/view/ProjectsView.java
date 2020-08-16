@@ -77,11 +77,11 @@ public class ProjectsView extends VerticalLayout {
 
     private Button createRemoveButton(Project project) {
         @SuppressWarnings("unchecked")
-        Button button = new Button("Удалить", clickEvent -> {
+        Button button = new Button("Remove", clickEvent -> {
             ConfirmDialog confirmDialog = new ConfirmDialog(
-                    "Вы уверены что хотите удалить Проект: "+project.getTitle()+" ?",
+                    "Are you sure you want to delete the Project: "+project.getTitle()+" ?",
                     "",
-                    "Удалить",
+                    "Remove",
                     ()->{
                         projectController.deleteProject(project.getId());
                         projectGrid.refreshGrid();
@@ -95,7 +95,7 @@ public class ProjectsView extends VerticalLayout {
 
     private Button createEditButton(Project project) {
         @SuppressWarnings("unchecked")
-        Button button = new Button("Изменить", clickEvent -> {
+        Button button = new Button("Edit", clickEvent -> {
             ProjectDto projectDto = new ProjectDto();
             Binder<ProjectDto> binder = new Binder<>();
             VerticalLayout content = new VerticalLayout();
@@ -107,8 +107,8 @@ public class ProjectsView extends VerticalLayout {
             binder.forField(description).bind(ProjectDto::getDescription, ProjectDto::setDescription);
             FormLayout gridLayout = new FormLayout();
             gridLayout.add(title, description);
-            Button cancel = new Button("Отмена");
-            Button save = new Button("Сохранить");
+            Button cancel = new Button("Cancel");
+            Button save = new Button("Save");
             save.setIcon(VaadinIcon.PENCIL.create());
             content.add(gridLayout);
             HorizontalLayout hor = new HorizontalLayout();
@@ -144,7 +144,7 @@ public class ProjectsView extends VerticalLayout {
     private Button createProjectButton(){
         Button createProject = new Button();
         createProject.setIcon(VaadinIcon.PLUS_CIRCLE.create());
-        createProject.setText("Создать проект");
+        createProject.setText("Create project");
         createProject.addClickListener(buttonClickEvent -> {
             ProjectDto projectDto = new ProjectDto();
             Binder<ProjectDto> binder = new Binder<>();
@@ -155,8 +155,8 @@ public class ProjectsView extends VerticalLayout {
             binder.forField(description).bind(ProjectDto::getDescription, ProjectDto::setDescription);
             FormLayout gridLayout = new FormLayout();
             gridLayout.add(title, description);
-            Button cancel = new Button("Отмена");
-            Button save = new Button("Сохранить");
+            Button cancel = new Button("Cancel");
+            Button save = new Button("Save");
             save.setIcon(VaadinIcon.PENCIL.create());
             content.add(gridLayout);
             HorizontalLayout hor = new HorizontalLayout();

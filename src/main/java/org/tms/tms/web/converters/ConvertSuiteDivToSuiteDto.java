@@ -24,7 +24,7 @@ public class ConvertSuiteDivToSuiteDto implements Converter<ProjectView.SuiteDiv
             return Result.ok(suiteDto.getParentId());
         } catch (Exception e) {
             // error is a static helper method that creates a Result
-            return Result.error("Выберите значение");
+            return Result.error("Selected value");
         }
     }
 

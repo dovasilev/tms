@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 
 @Route(value = "Project", layout = MainPage.class)
 @UrlParameterMapping(":projectId")
-@PageTitle("Проект")
+@PageTitle("Project")
 @CssImport("./styles/style.css")
 @CssImport("./styles/shared-styles.css")
 public class ProjectView extends VerticalLayout implements HasUrlParameterMapping {
@@ -144,18 +144,18 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
     private Button createSuiteButton() {
         Button createSuite = new Button();
         createSuite.setIcon(VaadinIcon.PLUS_CIRCLE.create());
-        createSuite.setText("Создать сьют");
+        createSuite.setText("Create suite");
         createSuite.addClickListener(buttonClickEvent -> {
             SuiteDto suiteDto = new SuiteDto();
             Binder<SuiteDto> binder = new Binder<>();
             VerticalLayout content = new VerticalLayout();
-            TextField title = new TextField("Название");
+            TextField title = new TextField("Title");
             binder.forField(title).asRequired().bind(SuiteDto::getTitle, SuiteDto::setTitle);
-            TextField description = new TextField("Описание");
+            TextField description = new TextField("Description");
             binder.forField(description).bind(SuiteDto::getDescription, SuiteDto::setDescription);
             suiteDto.setProjectId(projectId);
             Select<SuiteDiv> select = new Select<>();
-            select.setLabel("Родительский сьют");
+            select.setLabel("Parent suite");
             List<SuiteDiv> suiteList = new LinkedList<>();
             suiteController.getAllSuitesByProject(projectId)
                     .forEach(x -> {
@@ -165,8 +165,8 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
             select.setItems(suiteList);
             FormLayout gridLayout = new FormLayout();
             gridLayout.add(title, description, select);
-            Button cancel = new Button("Отмена");
-            Button save = new Button("Сохранить");
+            Button cancel = new Button("Cancel");
+            Button save = new Button("Save");
             save.setIcon(VaadinIcon.PENCIL.create());
             content.add(gridLayout);
             HorizontalLayout hor = new HorizontalLayout();
@@ -204,7 +204,7 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
     private Button createTestButton() {
         Button createTest = new Button();
         createTest.setIcon(VaadinIcon.PLUS_CIRCLE.create());
-        createTest.setText("Создать тест");
+        createTest.setText("Create test");
         createTest.addClickListener(buttonClickEvent -> {
             CreateTestComponent createTestComponent = new CreateTestComponent(projectId,suiteController,testController,
                     () -> {
@@ -217,16 +217,16 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
 
     private HorizontalLayout actionsSuite(SuiteChild suite) {
         HorizontalLayout actions = new HorizontalLayout();
-        Button del = new Button("Удалить");
+        Button del = new Button("Remove");
         del.setIcon(VaadinIcon.TRASH.create());
         del.setId("del");
         del.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 ConfirmDialog confirmDialog = new ConfirmDialog(
-                        "Вы уверены что хотите удалить Сьют: " + suite.getSuite().getTitle() + " ?",
+                        "Are you sure you want to delete the Suite: " + suite.getSuite().getTitle() + " ?",
                         "",
-                        "Удалить",
+                        "Remove",
                         () -> {
                             suiteController.deleteSuite(suite.getSuite().getId());
                             init();
@@ -241,20 +241,20 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
     private Button editSuiteButton(SuiteChild suite) {
         Button createSuite = new Button();
         createSuite.setIcon(VaadinIcon.EDIT.create());
-        createSuite.setText("Изменить");
+        createSuite.setText("Edit");
         createSuite.addClickListener(buttonClickEvent -> {
             SuiteDto suiteDto = new SuiteDto();
             Binder<SuiteDto> binder = new Binder<>();
             VerticalLayout content = new VerticalLayout();
-            TextField title = new TextField("Название");
+            TextField title = new TextField("Title");
             binder.forField(title).asRequired().bind(SuiteDto::getTitle, SuiteDto::setTitle);
-            TextField description = new TextField("Описание");
+            TextField description = new TextField("Description");
             binder.forField(description).bind(SuiteDto::getDescription, SuiteDto::setDescription);
             suiteDto.setProjectId(projectId);
             title.setValue(suite.getSuite().getTitle());
             description.setValue(suite.getSuite().getDescription());
             Select<SuiteDiv> select = new Select<>();
-            select.setLabel("Родительский сьют");
+            select.setLabel("Parent suite");
             Collection<SuiteDiv> suiteList = new LinkedList<>();
             allSuites.forEach(x -> {
                 suiteList.add(new SuiteDiv(x));
@@ -270,8 +270,8 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
             }
             FormLayout gridLayout = new FormLayout();
             gridLayout.add(title, description, select);
-            Button cancel = new Button("Отмена");
-            Button save = new Button("Сохранить");
+            Button cancel = new Button("Cancel");
+            Button save = new Button("Save");
             save.setIcon(VaadinIcon.PENCIL.create());
             content.add(gridLayout);
             HorizontalLayout hor = new HorizontalLayout();
@@ -310,16 +310,16 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
 
     private HorizontalLayout actionsTest(Test test) {
         HorizontalLayout actions = new HorizontalLayout();
-        Button del = new Button("Удалить");
+        Button del = new Button("Remove");
         del.setIcon(VaadinIcon.TRASH.create());
         del.setId("del");
         del.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 ConfirmDialog confirmDialog = new ConfirmDialog(
-                        "Вы уверены что хотите удалить Тест: " + test.getTitle() + " ?",
+                        "Are you sure you want to delete the Test: " + test.getTitle() + " ?",
                         "",
-                        "Удалить",
+                        "Remove",
                         () -> {
                             testController.deleteTest(test.getId());
                             init();
@@ -334,7 +334,7 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
     private Button editTestButton(Test test) {
         Button editTest = new Button();
         editTest.setIcon(VaadinIcon.EDIT.create());
-        editTest.setText("Изменить");
+        editTest.setText("Edit");
         editTest.addClickListener(buttonClickEvent -> {
             EditTestComponent editTestComponent = new EditTestComponent(test,suiteController,testController,() -> {
                 init();

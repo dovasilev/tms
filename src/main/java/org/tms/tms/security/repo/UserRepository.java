@@ -5,6 +5,6 @@ import org.tms.tms.security.dao.Users;
 
 public interface UserRepository extends JpaRepository<Users, Long> {
 
-    Users findByUsername(String username);
+    Users findByUserEmail(String email);
 
 }

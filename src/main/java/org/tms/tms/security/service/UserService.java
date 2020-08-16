@@ -19,18 +19,18 @@ public class UserService {
         this.userRepository = userRepository;
     }
 
-    public Users newUser(SignUpField signUpField){
+    public Users newUser(SignUpField signUpField) {
         Users user = new Users();
-        user.setUsername(signUpField.getLogin());
+        user.setUserEmail(signUpField.getEmail());
         user.setFullName(signUpField.getFullName());
         user.setPassword(passwordEncoder.encode(signUpField.getPass()));
-        user.setEmail(signUpField.getEmail());
         user.setRoles(new String[]{"USER"});
         return userRepository.save(user);
     }
 
-    public Users getUserByUsername(String userName){
-        Users users = userRepository.findByUsername(userName);
+    public Users getUserByEmail(String email){
+        Users users = userRepository.findByUserEmail(email);
         return users;
     }
+
 }

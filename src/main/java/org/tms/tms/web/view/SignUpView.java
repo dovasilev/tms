@@ -11,6 +11,7 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
@@ -23,7 +24,6 @@ public class SignUpView extends Div {
 
     EmailField emailField;
     TextField fullNameField;
-    TextField loginField;
     PasswordField passwordField;
     PasswordField repeatPasswordField;
 
@@ -38,18 +38,13 @@ public class SignUpView extends Div {
         H2 label = new H2("Sign up");
         emailField = new EmailField("Email");
         emailField.setClearButtonVisible(true);
-        emailField.setErrorMessage("Please enter a valid email address");
         binder.forField(emailField)
-                .withValidator(new StringLengthValidator("Fill " + emailField.getLabel(), 1, 999))
+                .withValidator(new EmailValidator("Fill valid "+emailField.getLabel()))
                 .bind(SignUpField::getEmail, SignUpField::setEmail);
         fullNameField = new TextField("FullName");
         binder.forField(fullNameField)
                 .withValidator(new StringLengthValidator("Fill " + fullNameField.getLabel(), 1, 999))
                 .bind(SignUpField::getFullName, SignUpField::setFullName);
-        loginField = new TextField("Username");
-        binder.forField(loginField)
-                .withValidator(new StringLengthValidator("Fill " + loginField.getLabel(), 1, 999))
-                .bind(SignUpField::getLogin, SignUpField::setLogin);
         passwordField = new PasswordField("Password");
         binder.forField(passwordField)
                 .withValidator(new StringLengthValidator("Fill " + passwordField.getLabel(), 1, 999))
@@ -64,13 +59,18 @@ public class SignUpView extends Div {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                 if (binder.writeBeanIfValid(signUpField)) {
-                    userService.newUser(signUpField);
-                    System.out.print("Юзер создан");
+                    try {
+                        userService.newUser(signUpField);
+                        System.out.print("Юзер создан");
+                    }
+                    catch (Exception e) {
+                        throw e;
+                    }
                     UI.getCurrent().navigate(SignInView.class);
                 }
             }
         });
-        formLayout.add(label,emailField,fullNameField,loginField,passwordField,repeatPasswordField,create);
+        formLayout.add(label,emailField,fullNameField,passwordField,repeatPasswordField,create);
         add(formLayout);
         }
 

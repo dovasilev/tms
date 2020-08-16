@@ -21,16 +21,14 @@ public class ResetTokenService {
     }
 
     @Transactional
-    public synchronized String newToken (String userName)
-    {
-
-        Users users = userService.getUserByUsername(userName);
-        ResetToken resetToken = new ResetToken();
-        resetToken.setObjectId(users);
-        resetToken.setToken(UUID.randomUUID().toString());
-
-        resetTokenRepository.save(resetToken);
-
-        return resetToken.getToken();
+    public synchronized String newToken(String userName) {
+        Users users = userService.getUserByEmail(userName);
+        if (users != null) {
+            ResetToken resetToken = new ResetToken();
+            resetToken.setObjectId(users);
+            resetToken.setToken(UUID.randomUUID().toString());
+            resetTokenRepository.save(resetToken);
+            return resetToken.getToken();
+        } else return "";
     }
 }

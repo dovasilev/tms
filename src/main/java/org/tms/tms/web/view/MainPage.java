@@ -101,7 +101,7 @@ public class MainPage extends AppLayout {
 
     private Component[] createMenuItems() {
         RouterLink[] links = new RouterLink[]{
-                new RouterLink("Проекты", ProjectsView.class)
+                new RouterLink("Projects", ProjectsView.class)
         };
         return Arrays.stream(links).map(MainPage::createTab).toArray(Tab[]::new);
     }
@@ -183,7 +183,7 @@ public class MainPage extends AppLayout {
             }
         });
         ChangeThemeComponent changeThemeComponent = new ChangeThemeComponent(headerContent);
-        Label fullName = new Label(userService.getUserByUsername(SecurityUtils.getLoggedUser().getUsername()).getFullName());
+        Label fullName = new Label(userService.getUserByEmail(SecurityUtils.getLoggedUser().getUsername()).getFullName());
         fullName.getStyle().set("padding-right", "1em");
         addToNavbar(fullName, changeThemeComponent, label , logoutButton);
     }

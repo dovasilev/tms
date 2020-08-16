@@ -60,7 +60,7 @@ public class EditTestComponent extends Dialog {
         this.actionClose = actionClose;
         this.stepBinderMap = new LinkedHashMap<>();
         setSizeFull();
-        setAriaLabel("Изменение теста");
+        setAriaLabel("Edit Test");
         getElement().getStyle().set("scrolling", "auto");
         testDto = new TestDto();
         testDto.setTitle(test.getTitle());
@@ -72,17 +72,17 @@ public class EditTestComponent extends Dialog {
         testDto.setSteps(test.getSteps());
         binder = new Binder<>();
         VerticalLayout content = new VerticalLayout();
-        TextField title = new TextField("Название");
+        TextField title = new TextField("Title");
         title.setRequired(true);
         binder.forField(title)
-                .withValidator(new StringLengthValidator("Заполните поле", 1, 200))
+                .withValidator(new StringLengthValidator("Fill field", 1, 200))
                 .bind(TestDto::getTitle, TestDto::setTitle);
-        TextField description = new TextField("Описание");
+        TextField description = new TextField("Description");
         binder.forField(description).bind(TestDto::getDescription, TestDto::setDescription);
         testDto.setProjectId(test.getProjectId().getId());
         select = new Select<>();
         select.setRequiredIndicatorVisible(true);
-        select.setLabel("Родительский сьют");
+        select.setLabel("Parent Suite");
         List<ProjectView.SuiteDiv> suiteList = new LinkedList<>();
         suiteController.getAllSuitesByProject(test.getProjectId().getId())
                 .forEach(x -> {
@@ -92,12 +92,12 @@ public class EditTestComponent extends Dialog {
         select.setItems(suiteList);
         binder.forField(select).withConverter(new ConvertSuiteDivToSuiteDto()).asRequired().bind(TestDto::getSuiteId, TestDto::setSuiteId);
         Checkbox isAutomated = new Checkbox();
-        isAutomated.setLabel("Автоматизирон");
+        isAutomated.setLabel("Automated");
         binder.forField(isAutomated).bind(TestDto::getAutomated, TestDto::setAutomated);
-        TextField status = new TextField("Статус");
+        TextField status = new TextField("Status");
         binder.forField(status).bind(TestDto::getStatus, TestDto::setStatus);
         action = new HorizontalLayout();
-        Button createStep = new Button("Создать шаг");
+        Button createStep = new Button("Create step");
         action.add(createStep);
         createStep.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
@@ -129,8 +129,8 @@ public class EditTestComponent extends Dialog {
     }
 
     private void cancelSave() {
-        Button cancel = new Button("Отмена");
-        Button save = new Button("Сохранить");
+        Button cancel = new Button("Cancel");
+        Button save = new Button("Save");
         save.setIcon(VaadinIcon.PENCIL.create());
         cancel.addClickListener(buttonClickEvent -> {
             close();
@@ -167,13 +167,13 @@ public class EditTestComponent extends Dialog {
     private void renderStep(Step step){
         Binder<Step> stepBinder = new Binder<>();
         VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.add(new Label("Шаг № "+step.getNumber()));
+        verticalLayout.add(new Label("Step № "+step.getNumber()));
         verticalLayout.getStyle().set("border","1px solid #e5e5e5");
         HorizontalLayout name = new HorizontalLayout();
         name.setWidthFull();
-        Label nameAction = new Label("Действие");
+        Label nameAction = new Label("Action");
         nameAction.getElement().getStyle().set("width","50%");
-        Label nameResult = new Label("Ожидаемый результат");
+        Label nameResult = new Label("Expected result");
         nameResult.getElement().getStyle().set("width","50%");
         name.add(nameAction,nameResult);
         verticalLayout.add(name);
@@ -199,13 +199,13 @@ public class EditTestComponent extends Dialog {
         step.setNumber(nextStep);
         Binder<Step> stepBinder = new Binder<>();
         VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.add(new Label("Шаг № "+ nextStep));
+        verticalLayout.add(new Label("Step № "+ nextStep));
         verticalLayout.getStyle().set("border","1px solid #e5e5e5");
         HorizontalLayout name = new HorizontalLayout();
         name.setWidthFull();
-        Label nameAction = new Label("Действие");
+        Label nameAction = new Label("Action");
         nameAction.getElement().getStyle().set("width","50%");
-        Label nameResult = new Label("Ожидаемый результат");
+        Label nameResult = new Label("Expected result");
         nameResult.getElement().getStyle().set("width","50%");
         name.add(nameAction,nameResult);
         verticalLayout.add(name);
