@@ -15,7 +15,7 @@ import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.tms.tms.dto.SignUpField;
-import org.tms.tms.security.UserService;
+import org.tms.tms.security.service.UserService;
 
 @Route(value = "SignUp", layout = LoginPage.class)
 @PageTitle("SignUp")

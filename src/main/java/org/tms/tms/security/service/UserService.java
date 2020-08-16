@@ -1,12 +1,11 @@
-package org.tms.tms.security;
+package org.tms.tms.security.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.tms.tms.dto.SignUpField;
-
-import javax.management.relation.Role;
+import org.tms.tms.security.dao.Users;
+import org.tms.tms.security.repo.UserRepository;
 
 @Service
 public class UserService {

@@ -26,7 +26,7 @@ import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 import lombok.SneakyThrows;
 import org.tms.tms.security.SecurityUtils;
-import org.tms.tms.security.UserService;
+import org.tms.tms.security.service.UserService;
 import org.tms.tms.web.components.ChangeThemeComponent;
 
 import java.util.Arrays;

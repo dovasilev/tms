@@ -7,6 +7,8 @@ import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.tms.tms.security.dao.Users;
+import org.tms.tms.security.repo.UserRepository;
 
 public class UserDetailsServiceImp implements UserDetailsService {
 

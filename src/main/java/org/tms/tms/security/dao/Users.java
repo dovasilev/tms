@@ -1,4 +1,4 @@
-package org.tms.tms.security;
+package org.tms.tms.security.dao;
 
 import lombok.AccessLevel;
 import lombok.Getter;
