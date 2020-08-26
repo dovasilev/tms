@@ -35,6 +35,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
     private static final String LOGIN_URL = "/login";
     private static final String LOGOUT_SUCCESS_URL = "/login";
     private static final String RESET_PASSWORD_URL = "/resetPassword/*";
+    private static final String INVITE_URL = "/invite/*";
 
     /**
      * Require login to access internal pages and configure login form.
@@ -79,13 +80,15 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
                 // Allow all flow internal requests.
                 .requestMatchers(SecurityUtils::isFrameworkInternalRequest).permitAll()
-                .antMatchers("/resetPassword/*").permitAll()
+                .antMatchers(RESET_PASSWORD_URL).permitAll()
+                .antMatchers(INVITE_URL).permitAll()
                 // Allow all requests by logged in users.
                 .anyRequest().authenticated()
                 .and().formLogin().loginPage(LOGIN_URL).permitAll()
                 .loginProcessingUrl(SIGN_IN_URL)
                 .loginProcessingUrl(SIGN_UP_URL)
-                .loginProcessingUrl(RESET_PASSWORD_URL)
+                //.loginProcessingUrl(RESET_PASSWORD_URL)
+                //.loginProcessingUrl(INVITE_URL)
                 .failureUrl(LOGIN_FAILURE_URL)
 
                 // Configure logout

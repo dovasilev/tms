@@ -20,6 +20,7 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.tms.tms.security.SecurityUtils;
+import org.tms.tms.security.dao.InviteToken;
 import org.tms.tms.web.view.*;
 
 import java.util.List;
@@ -63,6 +64,9 @@ public class TmsApplication extends SpringBootServletInitializer implements Vaad
 					event.rerouteTo(SignInView.class);
 				}
 				else if (target.contains(getPathView(ResetPasswordView.class))){
+
+				}
+				else if (target.contains(getPathView(InviteView.class))){
 
 				}
 				else event.rerouteTo(SignInView.class);

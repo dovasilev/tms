@@ -39,7 +39,7 @@ public class SignUpView extends Div {
         emailField = new EmailField("Email");
         emailField.setClearButtonVisible(true);
         binder.forField(emailField)
-                .withValidator(new EmailValidator("Fill valid "+emailField.getLabel()))
+                .withValidator(new EmailValidator("Fill valid " + emailField.getLabel()))
                 .bind(UsersDto::getEmail, UsersDto::setEmail);
         fullNameField = new TextField("FullName");
         binder.forField(fullNameField)
@@ -62,17 +62,16 @@ public class SignUpView extends Div {
                     try {
                         userService.newUser(usersDto);
                         System.out.print("Юзер создан");
-                    }
-                    catch (Exception e) {
+                    } catch (Exception e) {
                         throw e;
                     }
                     UI.getCurrent().navigate(SignInView.class);
                 }
             }
         });
-        formLayout.add(label,emailField,fullNameField,passwordField,repeatPasswordField,create);
+        formLayout.add(label, emailField, fullNameField, passwordField, repeatPasswordField, create);
         add(formLayout);
-        }
-
-
     }
+
+
+}

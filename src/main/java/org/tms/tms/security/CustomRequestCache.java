@@ -35,7 +35,8 @@ public class CustomRequestCache extends HttpSessionRequestCache {
                 if (!requestURI.contains(LoginPage.ROUTE)
                         && !requestURI.toLowerCase().contains("signin")
                         && !requestURI.toLowerCase().contains("signup")
-                        && !requestURI.toLowerCase().contains("resetpassword"))
+                        && !requestURI.toLowerCase().contains("resetpassword")
+                        && !requestURI.toLowerCase().contains("invite"))
                 return requestURI.startsWith("/") ? requestURI.substring(1) : requestURI; //
             }
         }
