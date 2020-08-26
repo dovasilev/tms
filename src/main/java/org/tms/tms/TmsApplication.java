@@ -62,6 +62,9 @@ public class TmsApplication extends SpringBootServletInitializer implements Vaad
 				else if (getPathView(SignInView.class).equals(target)){
 					event.rerouteTo(SignInView.class);
 				}
+				else if (target.contains(getPathView(ResetPasswordView.class))){
+
+				}
 				else event.rerouteTo(SignInView.class);
 			}
 	}

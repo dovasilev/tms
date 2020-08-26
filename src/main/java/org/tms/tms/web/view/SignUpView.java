@@ -15,7 +15,7 @@ import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.validator.StringLengthValidator;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.tms.tms.dto.SignUpField;
+import org.tms.tms.dto.UsersDto;
 import org.tms.tms.security.service.UserService;
 
 @Route(value = "SignUp", layout = LoginPage.class)
@@ -33,34 +33,34 @@ public class SignUpView extends Div {
         formLayout.setHeightFull();
         formLayout.getElement().setAttribute("part", "vaadin-login-native-form-wrapper");
         formLayout.getElement().getStyle().set("max-width", "calc(var(--lumo-size-m) * 10)");
-        Binder<SignUpField> binder = new Binder<>();
-        SignUpField signUpField = new SignUpField();
+        Binder<UsersDto> binder = new Binder<>();
+        UsersDto usersDto = new UsersDto();
         H2 label = new H2("Sign up");
         emailField = new EmailField("Email");
         emailField.setClearButtonVisible(true);
         binder.forField(emailField)
                 .withValidator(new EmailValidator("Fill valid "+emailField.getLabel()))
-                .bind(SignUpField::getEmail, SignUpField::setEmail);
+                .bind(UsersDto::getEmail, UsersDto::setEmail);
         fullNameField = new TextField("FullName");
         binder.forField(fullNameField)
                 .withValidator(new StringLengthValidator("Fill " + fullNameField.getLabel(), 1, 999))
-                .bind(SignUpField::getFullName, SignUpField::setFullName);
+                .bind(UsersDto::getFullName, UsersDto::setFullName);
         passwordField = new PasswordField("Password");
         binder.forField(passwordField)
                 .withValidator(new StringLengthValidator("Fill " + passwordField.getLabel(), 1, 999))
-                .bind(SignUpField::getPass, SignUpField::setPass);
+                .bind(UsersDto::getPass, UsersDto::setPass);
         repeatPasswordField = new PasswordField("Repeat Password");
         binder.forField(repeatPasswordField).withValidator(value -> value.equals(passwordField.getValue()),
                 "Password and Repeat Password not equals")
-                .bind(SignUpField::getRepeatPass, SignUpField::setRepeatPass);
+                .bind(UsersDto::getRepeatPass, UsersDto::setRepeatPass);
         Button create = new Button("Registration");
         create.getElement().getThemeList().set("primary contained", true);
         create.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                if (binder.writeBeanIfValid(signUpField)) {
+                if (binder.writeBeanIfValid(usersDto)) {
                     try {
-                        userService.newUser(signUpField);
+                        userService.newUser(usersDto);
                         System.out.print("Юзер создан");
                     }
                     catch (Exception e) {
