@@ -25,6 +25,7 @@ import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.Theme;
 import com.vaadin.flow.theme.lumo.Lumo;
 import lombok.SneakyThrows;
+import org.springframework.boot.system.ApplicationHome;
 import org.tms.tms.security.SecurityUtils;
 import org.tms.tms.security.service.UserService;
 import org.tms.tms.web.components.ChangeThemeComponent;
@@ -183,9 +184,15 @@ public class MainPage extends AppLayout {
             }
         });
         ChangeThemeComponent changeThemeComponent = new ChangeThemeComponent(headerContent);
+        HorizontalLayout profile = new HorizontalLayout();
         Label fullName = new Label(userService.getUserByEmail(SecurityUtils.getLoggedUser().getUsername()).getFullName());
+        Icon icon = new Icon(VaadinIcon.EDIT);
+        icon.getStyle().set("margin","auto");
+        profile.add(icon,fullName);
+        profile.addClickListener(horizontalLayoutClickEvent ->
+                UI.getCurrent().navigate(ProfileView.class));
         fullName.getStyle().set("padding-right", "1em");
-        addToNavbar(fullName, changeThemeComponent, label , logoutButton);
+        addToNavbar(profile, changeThemeComponent, label , logoutButton);
     }
 
 
