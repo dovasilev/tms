@@ -62,23 +62,23 @@ public class ResetPasswordView extends VerticalLayout implements HasUrlParameter
         formLayout.getStyle().set("align-self","center");
         formLayout.getElement().setAttribute("part", "vaadin-login-native-form-wrapper");
         formLayout.getElement().getStyle().set("max-width", "calc(var(--lumo-size-m) * 10)");
-        H2 label = new H2("Reset Password");
+        H2 label = new H2(getTranslation("changePassword"));
         Users users = resetTokenService.getUserByToken(token);
         if (users!=null){
             Binder<UsersDto> binder = new Binder<>();
             UsersDto usersDto = new UsersDto();
-            emailField = new EmailField("Email");
+            emailField = new EmailField(getTranslation("email"));
             emailField.setReadOnly(true);
             emailField.setValue(users.getUserEmail());
-            passwordField = new PasswordField("Password");
+            passwordField = new PasswordField(getTranslation("password"));
             binder.forField(passwordField)
-                    .withValidator(new StringLengthValidator("Fill " + passwordField.getLabel(), 1, 999))
+                    .withValidator(new StringLengthValidator(getTranslation("fill") + passwordField.getLabel(), 1, 999))
                     .bind(UsersDto::getPass, UsersDto::setPass);
-            repeatPasswordField = new PasswordField("Repeat Password");
+            repeatPasswordField = new PasswordField(getTranslation("confirmPassword"));
             binder.forField(repeatPasswordField).withValidator(value -> value.equals(passwordField.getValue()),
-                    "Password and Repeat Password not equals")
+                    getTranslation("signUp.passwordMessage"))
                     .bind(UsersDto::getRepeatPass, UsersDto::setRepeatPass);
-            Button reset = new Button("Reset Password");
+            Button reset = new Button(getTranslation("updatePassword"));
             reset.getElement().getThemeList().set("primary contained", true);
             reset.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
                 @Override
@@ -86,7 +86,6 @@ public class ResetPasswordView extends VerticalLayout implements HasUrlParameter
                     if (binder.writeBeanIfValid(usersDto)) {
                         try {
                             resetTokenService.resetPassword(users.getUserEmail(),usersDto.getPass());
-                            System.out.print("Пароль изменен");
                         }
                         catch (Exception e) {
                             throw e;
@@ -98,7 +97,7 @@ public class ResetPasswordView extends VerticalLayout implements HasUrlParameter
             formLayout.add(label,emailField,passwordField,repeatPasswordField, reset);
             add(formLayout);
         }
-        else formLayout.add("Reset Token used or deleted");
+        else formLayout.add(getTranslation("resetTokenMessage"));
         add(formLayout);
     }
 

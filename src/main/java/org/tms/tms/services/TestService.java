@@ -1,10 +1,12 @@
 package org.tms.tms.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.tms.tms.dao.Project;
 import org.tms.tms.dao.Suite;
 import org.tms.tms.dao.Test;
+import org.tms.tms.dto.ProjectDto;
 import org.tms.tms.dto.TestDto;
+import org.tms.tms.mappers.ProjectMapper;
 import org.tms.tms.repo.TestRepo;
 
 import javax.transaction.Transactional;
@@ -16,12 +18,20 @@ import java.util.NoSuchElementException;
 public class TestService {
 
     private TestRepo testRepo;
-    private SuiteService suiteService;
     private ProjectService projectService;
 
-    public TestService(TestRepo testRepo, SuiteService suiteService, ProjectService projectService) {
-        this.testRepo = testRepo;
+    private SuiteService suiteService;
+
+    @Autowired
+    private void setSuiteService(SuiteService suiteService) {
         this.suiteService = suiteService;
+    }
+
+    @Autowired
+    private ProjectMapper projectMapper;
+
+    public TestService(TestRepo testRepo, ProjectService projectService) {
+        this.testRepo = testRepo;
         this.projectService = projectService;
     }
 
@@ -51,13 +61,13 @@ public class TestService {
     @Transactional
     public synchronized Test insert(TestDto testDto) {
         Test test = new Test();
-        Project project = projectService.getProjectById(testDto.getProjectId());
+        ProjectDto project = projectService.getProjectById(testDto.getProjectId());
         Suite suite = null;
         if (testDto.getSuiteId() != null) {
             suite = suiteService.getSuiteById(testDto.getSuiteId());
         }
         test.setTitle(testDto.getTitle());
-        test.setProjectId(project);
+        test.setProjectId(projectMapper.projectDtoToProject(project));
         test.setSuiteId(suite);
         test.setDescription(testDto.getDescription());
         test.setStatus(testDto.getStatus());
@@ -77,13 +87,13 @@ public class TestService {
     @Transactional
     public synchronized Test updateTest(Long testId, TestDto testDto) {
         Test test = getById(testId);
-        Project project = projectService.getProjectById(testDto.getProjectId());
+        ProjectDto project = projectService.getProjectById(testDto.getProjectId());
         Suite suite = null;
         if (testDto.getSuiteId() != null) {
             suite = suiteService.getSuiteById(testDto.getSuiteId());
         }
         test.setTitle(testDto.getTitle());
-        test.setProjectId(project);
+        test.setProjectId(projectMapper.projectDtoToProject(project));
         test.setSuiteId(suite);
         test.setDescription(testDto.getDescription());
         test.setStatus(testDto.getStatus());

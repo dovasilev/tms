@@ -32,7 +32,7 @@ public class ConfirmDialog extends Dialog {
             close();
         });
         confirm.setId("del");
-        final Button cancel = new Button("Cancel", e -> close());
+        final Button cancel = new Button(getTranslation("cancel"), e -> close());
         buttons.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         buttons.add(cancel);
         buttons.add(confirm);

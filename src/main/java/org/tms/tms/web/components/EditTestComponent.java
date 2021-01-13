@@ -60,7 +60,7 @@ public class EditTestComponent extends Dialog {
         this.actionClose = actionClose;
         this.stepBinderMap = new LinkedHashMap<>();
         setSizeFull();
-        setAriaLabel("Edit Test");
+        setAriaLabel(getTranslation("editTest") + " " + test.getTitle());
         getElement().getStyle().set("scrolling", "auto");
         testDto = new TestDto();
         testDto.setTitle(test.getTitle());
@@ -75,7 +75,7 @@ public class EditTestComponent extends Dialog {
         TextField title = new TextField("Title");
         title.setRequired(true);
         binder.forField(title)
-                .withValidator(new StringLengthValidator("Fill field", 1, 200))
+                .withValidator(new StringLengthValidator(getTranslation("fill"), 1, 200))
                 .bind(TestDto::getTitle, TestDto::setTitle);
         TextField description = new TextField("Description");
         binder.forField(description).bind(TestDto::getDescription, TestDto::setDescription);
@@ -97,7 +97,7 @@ public class EditTestComponent extends Dialog {
         TextField status = new TextField("Status");
         binder.forField(status).bind(TestDto::getStatus, TestDto::setStatus);
         action = new HorizontalLayout();
-        Button createStep = new Button("Create step");
+        Button createStep = new Button(getTranslation("createStep"));
         action.add(createStep);
         createStep.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
@@ -129,8 +129,8 @@ public class EditTestComponent extends Dialog {
     }
 
     private void cancelSave() {
-        Button cancel = new Button("Cancel");
-        Button save = new Button("Save");
+        Button cancel = new Button(getTranslation("cancel"));
+        Button save = new Button(getTranslation("save"));
         save.setIcon(VaadinIcon.PENCIL.create());
         cancel.addClickListener(buttonClickEvent -> {
             close();
@@ -149,7 +149,7 @@ public class EditTestComponent extends Dialog {
                 testDto.setSteps(new Steps(steps));
                 binder.validate();
                 if (binder.writeBeanIfValid(testDto)) {
-                    testController.updateTest(test.getId(),testDto);
+                    testController.updateTest(test.getId(), testDto);
                     close();
                     actionClose.run();
                 }
@@ -162,64 +162,62 @@ public class EditTestComponent extends Dialog {
     }
 
 
-
-
-    private void renderStep(Step step){
+    private void renderStep(Step step) {
         Binder<Step> stepBinder = new Binder<>();
         VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.add(new Label("Step № "+step.getNumber()));
-        verticalLayout.getStyle().set("border","1px solid #e5e5e5");
+        verticalLayout.add(new Label(getTranslation("step") + step.getNumber()));
+        verticalLayout.getStyle().set("border", "1px solid #e5e5e5");
         HorizontalLayout name = new HorizontalLayout();
         name.setWidthFull();
-        Label nameAction = new Label("Action");
-        nameAction.getElement().getStyle().set("width","50%");
-        Label nameResult = new Label("Expected result");
-        nameResult.getElement().getStyle().set("width","50%");
-        name.add(nameAction,nameResult);
+        Label nameAction = new Label(getTranslation("action"));
+        nameAction.getElement().getStyle().set("width", "50%");
+        Label nameResult = new Label(getTranslation("expectedResult"));
+        nameResult.getElement().getStyle().set("width", "50%");
+        name.add(nameAction, nameResult);
         verticalLayout.add(name);
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setWidthFull();
         MarkdownArea action = new MarkdownArea();
-        action.getElement().getStyle().set("width","50%");
+        action.getElement().getStyle().set("width", "50%");
         MarkdownArea result = new MarkdownArea();
-        result.getElement().getStyle().set("width","50%");
+        result.getElement().getStyle().set("width", "50%");
         horizontalLayout.add(action);
         horizontalLayout.add(result);
-        stepBinder.forField(action.getInput()).bind(Step::getAction,Step::setAction);
-        stepBinder.forField(result.getInput()).bind(Step::getExpectedResult,Step::setExpectedResult);
-        stepBinderMap.put(step,stepBinder);
-        nextStep = step.getNumber()+1;
+        stepBinder.forField(action.getInput()).bind(Step::getAction, Step::setAction);
+        stepBinder.forField(result.getInput()).bind(Step::getExpectedResult, Step::setExpectedResult);
+        stepBinderMap.put(step, stepBinder);
+        nextStep = step.getNumber() + 1;
         verticalLayout.add(horizontalLayout);
         add(verticalLayout);
         add(this.action);
     }
 
-    private void addStep(){
+    private void addStep() {
         Step step = new Step();
         step.setNumber(nextStep);
         Binder<Step> stepBinder = new Binder<>();
         VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.add(new Label("Step № "+ nextStep));
-        verticalLayout.getStyle().set("border","1px solid #e5e5e5");
+        verticalLayout.add(new Label(getTranslation("step") + nextStep));
+        verticalLayout.getStyle().set("border", "1px solid #e5e5e5");
         HorizontalLayout name = new HorizontalLayout();
         name.setWidthFull();
-        Label nameAction = new Label("Action");
-        nameAction.getElement().getStyle().set("width","50%");
-        Label nameResult = new Label("Expected result");
-        nameResult.getElement().getStyle().set("width","50%");
-        name.add(nameAction,nameResult);
+        Label nameAction = new Label(getTranslation("action"));
+        nameAction.getElement().getStyle().set("width", "50%");
+        Label nameResult = new Label(getTranslation("expectedResult"));
+        nameResult.getElement().getStyle().set("width", "50%");
+        name.add(nameAction, nameResult);
         verticalLayout.add(name);
         HorizontalLayout horizontalLayout = new HorizontalLayout();
         horizontalLayout.setWidthFull();
         MarkdownArea action = new MarkdownArea();
-        action.getElement().getStyle().set("width","50%");
+        action.getElement().getStyle().set("width", "50%");
         MarkdownArea result = new MarkdownArea();
-        result.getElement().getStyle().set("width","50%");
+        result.getElement().getStyle().set("width", "50%");
         horizontalLayout.add(action);
         horizontalLayout.add(result);
-        stepBinder.forField(action.getInput()).bind(Step::getAction,Step::setAction);
-        stepBinder.forField(result.getInput()).bind(Step::getExpectedResult,Step::setExpectedResult);
-        stepBinderMap.put(step,stepBinder);
+        stepBinder.forField(action.getInput()).bind(Step::getAction, Step::setAction);
+        stepBinder.forField(result.getInput()).bind(Step::getExpectedResult, Step::setExpectedResult);
+        stepBinderMap.put(step, stepBinder);
         nextStep++;
         verticalLayout.add(horizontalLayout);
         add(verticalLayout);

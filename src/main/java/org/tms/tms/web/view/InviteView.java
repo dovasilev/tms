@@ -62,29 +62,29 @@ public class InviteView extends VerticalLayout implements HasUrlParameterMapping
         formLayout.getElement().getStyle().set("max-width", "calc(var(--lumo-size-m) * 10)");
         Binder<UsersDto> binder = new Binder<>();
         UsersDto usersDto = new UsersDto();
-        H2 label = new H2("Sign up by Invite");
+        H2 label = new H2("signUpByInvite");
         String email = inviteTokenService.getEmailByToken(token);
         if (email != null) {
-            emailField = new EmailField("Email");
+            emailField = new EmailField(getTranslation("email"));
             emailField.setClearButtonVisible(true);
             emailField.setValue(email);
             emailField.setReadOnly(true);
             binder.forField(emailField)
-                    .withValidator(new EmailValidator("Fill valid " + emailField.getLabel()))
+                    .withValidator(new EmailValidator(getTranslation("fillValid") + emailField.getLabel()))
                     .bind(UsersDto::getEmail, UsersDto::setEmail);
-            fullNameField = new TextField("FullName");
+            fullNameField = new TextField(getTranslation("fullName"));
             binder.forField(fullNameField)
-                    .withValidator(new StringLengthValidator("Fill " + fullNameField.getLabel(), 1, 999))
+                    .withValidator(new StringLengthValidator(getTranslation("fill") + fullNameField.getLabel(), 1, 999))
                     .bind(UsersDto::getFullName, UsersDto::setFullName);
             passwordField = new PasswordField("Password");
             binder.forField(passwordField)
-                    .withValidator(new StringLengthValidator("Fill " + passwordField.getLabel(), 1, 999))
+                    .withValidator(new StringLengthValidator(getTranslation("fill") + passwordField.getLabel(), 1, 999))
                     .bind(UsersDto::getPass, UsersDto::setPass);
-            repeatPasswordField = new PasswordField("Repeat Password");
+            repeatPasswordField = new PasswordField(getTranslation("confirmPassword"));
             binder.forField(repeatPasswordField).withValidator(value -> value.equals(passwordField.getValue()),
-                    "Password and Repeat Password not equals")
+                    getTranslation("signUp.passwordMessage"))
                     .bind(UsersDto::getRepeatPass, UsersDto::setRepeatPass);
-            Button create = new Button("Registration");
+            Button create = new Button(getTranslation("signUp.registration"));
             create.getElement().getThemeList().set("primary contained", true);
             create.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
                 @Override
@@ -93,7 +93,6 @@ public class InviteView extends VerticalLayout implements HasUrlParameterMapping
                         try {
                             userService.newUser(usersDto);
                             inviteTokenService.delInviteByEmail(usersDto.getEmail());
-                            System.out.print("Юзер создан");
                         } catch (Exception e) {
                             throw e;
                         }
@@ -104,7 +103,7 @@ public class InviteView extends VerticalLayout implements HasUrlParameterMapping
             formLayout.add(label, emailField, fullNameField, passwordField, repeatPasswordField, create);
             add(formLayout);
         }
-        else formLayout.add("Invite used or deleted");
+        else formLayout.add(getTranslation("inviteTokenMessage"));
         add(formLayout);
     }
 

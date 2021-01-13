@@ -49,7 +49,7 @@ public class CreateTestComponent extends Dialog {
         this.actionClose = actionClose;
         this.stepBinderMap = new LinkedHashMap<>();
         setSizeFull();
-        setAriaLabel("Create Test");
+        setAriaLabel(getTranslation("createTestTitle"));
         getElement().getStyle().set("scrolling","auto");
         this.testController = testController;
         testDto = new TestDto();
@@ -58,7 +58,7 @@ public class CreateTestComponent extends Dialog {
         TextField title = new TextField("Title");
         title.setRequired(true);
         binder.forField(title)
-                .withValidator(new StringLengthValidator("Fill field",1,200))
+                .withValidator(new StringLengthValidator(getTranslation("fill"),1,200))
                 .bind(TestDto::getTitle, TestDto::setTitle);
         TextField description = new TextField("Description");
         binder.forField(description).bind(TestDto::getDescription, TestDto::setDescription);
@@ -96,8 +96,8 @@ public class CreateTestComponent extends Dialog {
     }
 
     private void cancelSave(){
-        Button cancel = new Button("Cancel");
-        Button save = new Button("Save");
+        Button cancel = new Button(getTranslation("cancel"));
+        Button save = new Button(getTranslation("save"));
         save.setIcon(VaadinIcon.PENCIL.create());
         cancel.addClickListener(buttonClickEvent -> {
             close();
@@ -134,7 +134,7 @@ public class CreateTestComponent extends Dialog {
 
     private void init() {
         action = new HorizontalLayout();
-        Button createStep = new Button("Create step");
+        Button createStep = new Button(getTranslation("createStep"));
         action.add(createStep);
         createStep.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
@@ -149,13 +149,13 @@ public class CreateTestComponent extends Dialog {
         step.setNumber(i);
         Binder<Step> stepBinder = new Binder<>();
         VerticalLayout verticalLayout = new VerticalLayout();
-        verticalLayout.add(new Label("Step № "+i));
+        verticalLayout.add(new Label(getTranslation("step")+i));
         verticalLayout.getStyle().set("border","1px solid #e5e5e5");
         HorizontalLayout name = new HorizontalLayout();
         name.setWidthFull();
-        Label nameAction = new Label("Action");
+        Label nameAction = new Label(getTranslation("action"));
         nameAction.getElement().getStyle().set("width","50%");
-        Label nameResult = new Label("Expected result");
+        Label nameResult = new Label(getTranslation("expectedResult"));
         nameResult.getElement().getStyle().set("width","50%");
         name.add(nameAction,nameResult);
         verticalLayout.add(name);

@@ -12,11 +12,12 @@ import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
-import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.EmailValidator;
-import com.vaadin.flow.data.validator.StringLengthValidator;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.PreserveOnRefresh;
 import com.vaadin.flow.router.Route;
 import lombok.Getter;
 import lombok.Setter;
@@ -28,69 +29,75 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.tms.tms.security.CustomRequestCache;
 import org.tms.tms.security.service.ResetTokenService;
+import org.tms.tms.web.ReloadPage;
 
-@Route(value = "SignIn",layout = LoginPage.class)
+@Route(value = "signIn", layout = LoginPage.class)
 @PageTitle("SignIn")
-public class SignInView extends Div {
+@PreserveOnRefresh
+public class SignInView extends Div implements LocaleChangeObserver {
 
     AuthenticationManager authenticationManager;
     CustomRequestCache requestCache;
     private LoginForm loginForm;
     ResetTokenService resetTokenService;
 
-    @Getter @Setter
+    @Getter
+    @Setter
     private String email;
 
     @Autowired
     public SignInView(AuthenticationManager authenticationManager,
-                     CustomRequestCache requestCache,
+                      CustomRequestCache requestCache,
                       ResetTokenService resetTokenService) {
         this.authenticationManager = authenticationManager;
-        this.requestCache  = requestCache;
+        this.requestCache = requestCache;
         this.resetTokenService = resetTokenService;
         init();
     }
 
-    void init(){
+    void init() {
         loginForm = new LoginForm();
         LoginI18n i18n = LoginI18n.createDefault();
-        i18n.getForm().setUsername("Email");
-        i18n.getErrorMessage().setTitle("Incorrect email or password");
-        i18n.getErrorMessage().setMessage("Check that you have entered the correct email and password and try again.");
+        i18n.getForm().setTitle(getTranslation("signIn.title"));
+        i18n.getForm().setForgotPassword(getTranslation("signIn.forgotPassword"));
+        i18n.getForm().setSubmit(getTranslation("signIn.signInButton"));
+        i18n.getForm().setUsername(getTranslation("email"));
+        i18n.getErrorMessage().setTitle(getTranslation("signIn.incorrectEmail"));
+        i18n.getErrorMessage().setMessage(getTranslation("signIn.errorMessageLogin"));
         loginForm.setI18n(i18n);
         loginForm.addLoginListener(this::login);
         loginForm.addForgotPasswordListener(forgotPasswordEvent -> {
             Binder<SignInView> binder = new Binder<>();
             Dialog dialog = new Dialog();
-            dialog.add(new H3("Reset password"));
+            dialog.add(new H3(getTranslation("signIn.resetTitle")));
             dialog.setWidth("30em");
             VerticalLayout content = new VerticalLayout();
             content.setPadding(false);
             dialog.add(content);
             Label notification = new Label();
-            notification.setText("Instructions on how to reset your password have been sent to your email");
+            notification.setText(getTranslation("signIn.notification"));
             notification.setVisible(false);
             content.add(notification);
 
-            EmailField userName = new EmailField("Email");
+            EmailField userName = new EmailField(getTranslation("email"));
             binder.forField(userName)
-                    .withValidator(new EmailValidator("Fill valid "+userName.getLabel()))
-                    .bind(SignInView::getEmail,SignInView::setEmail);
+                    .withValidator(new EmailValidator(getTranslation("fillValid") + userName.getLabel()))
+                    .bind(SignInView::getEmail, SignInView::setEmail);
             userName.setWidthFull();
             content.add(userName);
             HorizontalLayout horizontalLayout = new HorizontalLayout();
-            Button resetButton = new Button("Reset");
+            Button resetButton = new Button(getTranslation("signIn.resetButton"));
             resetButton.addClickListener(buttonClickEvent -> {
                 if (binder.writeBeanIfValid(this)) {
                     resetTokenService.newToken(getEmail());
                     notification.setVisible(true);
                 }
             });
-            Button cancel = new Button("Cancel");
+            Button cancel = new Button(getTranslation("signIn.cancelButton"));
             cancel.addClickListener(buttonClickEvent -> dialog.close());
             horizontalLayout.add(cancel, resetButton);
             content.add(horizontalLayout);
-            content.setAlignSelf(FlexComponent.Alignment.END,horizontalLayout);
+            content.setAlignSelf(FlexComponent.Alignment.END, horizontalLayout);
             dialog.open();
         });
         add(loginForm);
@@ -117,6 +124,8 @@ public class SignInView extends Div {
         }
     }
 
-
-
+    @Override
+    public void localeChange(LocaleChangeEvent localeChangeEvent) {
+        ReloadPage.reloadPage(localeChangeEvent, this.getClass());
+    }
 }

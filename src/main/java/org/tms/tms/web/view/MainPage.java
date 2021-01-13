@@ -17,18 +17,16 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.tabs.Tab;
 import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
-import com.vaadin.flow.router.PageTitle;
-import com.vaadin.flow.router.Route;
-import com.vaadin.flow.router.RouteConfiguration;
-import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.i18n.LocaleChangeObserver;
+import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.theme.Theme;
-import com.vaadin.flow.theme.lumo.Lumo;
 import lombok.SneakyThrows;
-import org.springframework.boot.system.ApplicationHome;
 import org.tms.tms.security.SecurityUtils;
 import org.tms.tms.security.service.UserService;
+import org.tms.tms.web.ReloadPage;
 import org.tms.tms.web.components.ChangeThemeComponent;
+import org.tms.tms.web.components.LanguageSelectView;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -38,10 +36,9 @@ import java.util.Optional;
  */
 @CssImport("./styles/views/main/main-view.css")
 @CssImport("./styles/shared-styles.css")
-@Theme(value = Lumo.class)
 @PageTitle("TMS")
 @Route("")
-public class MainPage extends AppLayout {
+public class MainPage extends AppLayout implements LocaleChangeObserver {
 
     private final Tabs menu;
     private H1 viewTitle;
@@ -51,7 +48,8 @@ public class MainPage extends AppLayout {
     private UserService userService;
 
     public MainPage(UserService userService) {
-        setPrimarySection(Section.DRAWER);
+        //setPrimarySection(Section.DRAWER);
+        setPrimarySection(Section.NAVBAR);
         headerContent = createHeaderContent();
         addToNavbar(true, createHeaderContent());
         menu = createMenu();
@@ -69,9 +67,9 @@ public class MainPage extends AppLayout {
         header.add(new DrawerToggle());
         viewTitle = new H1();
         header.add(viewTitle);
-        logoutButton = createMenuButton("Logout", VaadinIcon.SIGN_OUT.create());
+        logoutButton = createMenuButton(getTranslation("logout"), VaadinIcon.SIGN_OUT.create());
         logoutButton.addClickListener(e -> logout());
-        logoutButton.getElement().setAttribute("title", "Logout (Ctrl+L)");
+        logoutButton.getElement().setAttribute("title", getTranslation("logout") + " (Ctrl+L)");
         return header;
     }
 
@@ -102,7 +100,7 @@ public class MainPage extends AppLayout {
 
     private Component[] createMenuItems() {
         RouterLink[] links = new RouterLink[]{
-                new RouterLink("Projects", ProjectsView.class)
+                new RouterLink(getTranslation("projects"), ProjectsView.class)
         };
         return Arrays.stream(links).map(MainPage::createTab).toArray(Tab[]::new);
     }
@@ -114,8 +112,7 @@ public class MainPage extends AppLayout {
     }
 
     @Override
-    protected void afterNavigation() {
-        super.afterNavigation();
+    public void afterNavigation() {
         updateChrome();
     }
 
@@ -187,13 +184,16 @@ public class MainPage extends AppLayout {
         HorizontalLayout profile = new HorizontalLayout();
         Label fullName = new Label(userService.getUserByEmail(SecurityUtils.getLoggedUser().getUsername()).getFullName());
         Icon icon = new Icon(VaadinIcon.EDIT);
-        icon.getStyle().set("margin","auto");
-        profile.add(icon,fullName);
+        icon.getStyle().set("margin", "auto");
+        profile.add(icon, fullName);
         profile.addClickListener(horizontalLayoutClickEvent ->
                 UI.getCurrent().navigate(ProfileView.class));
         fullName.getStyle().set("padding-right", "1em");
-        addToNavbar(profile, changeThemeComponent, label , logoutButton);
+        addToNavbar(profile, changeThemeComponent, label, new LanguageSelectView().getLangSelect(), logoutButton);
     }
 
-
+    @Override
+    public void localeChange(LocaleChangeEvent localeChangeEvent) {
+        ReloadPage.reloadPage(localeChangeEvent, this.getClass());
+    }
 }

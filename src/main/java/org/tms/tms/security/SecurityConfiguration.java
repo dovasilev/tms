@@ -129,6 +129,7 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 // icons and images
                 "/icons/**",
                 "/images/**",
+                "/img/**",
 
                 // (development mode) static resources
                 "/frontend/**",

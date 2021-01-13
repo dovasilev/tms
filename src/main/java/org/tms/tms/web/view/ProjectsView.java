@@ -7,84 +7,73 @@ import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
+import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.ItemClickEvent;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
-import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.data.binder.Binder;
+import com.vaadin.flow.i18n.LocaleChangeEvent;
+import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import org.tms.tms.api.ProjectController;
-import org.tms.tms.api.SuiteController;
-import org.tms.tms.api.TestController;
-import org.tms.tms.dao.Project;
 import org.tms.tms.dto.ProjectDto;
-import org.vaadin.crudui.crud.impl.GridCrud;
+import org.tms.tms.web.ReloadPage;
 
 @CssImport("./styles/shared-styles.css")
-@Route(value = "Projects", layout = MainPage.class)
+@Route(value = "projects", layout = MainPage.class)
 @PageTitle("Projects")
-public class ProjectsView extends VerticalLayout {
+public class ProjectsView extends VerticalLayout implements LocaleChangeObserver {
 
     private ProjectController projectController;
-    private SuiteController suiteController;
-    private TestController testController;
-    private Tabs menu;
-    GridCrud<Project> projectGrid;
+    Grid<ProjectDto> grid;
 
-    public ProjectsView(ProjectController projectController, SuiteController suiteController, TestController testController) {
+    public ProjectsView(ProjectController projectController) {
         this.projectController = projectController;
-        this.suiteController = suiteController;
-        this.testController = testController;
-        setSizeFull();
-        add(createProjectButton());
-        grid();
+        init();
     }
 
-    private void grid(){
-        projectGrid = new GridCrud<>(Project.class);
-        projectGrid.getGrid().getStyle().set("border","none");
-        projectGrid.setSizeFull();
-        projectGrid.getGrid().setColumns("id","title", "description");
-        projectGrid.getGrid().getColumnByKey("id").setWidth("75px").setFlexGrow(0);
-        projectGrid.getGrid().addComponentColumn(project -> {
-            return createEditButton(project);
-        });
-        projectGrid.getGrid().addComponentColumn(project -> {
-            return createRemoveButton(project);
-        });
-        projectGrid.getGrid().setColumnReorderingAllowed(false);
-        projectGrid.getCrudFormFactory().setUseBeanValidation(true);
-        projectGrid.getAddButton().setVisible(false);
-        projectGrid.getDeleteButton().setVisible(false);
-        projectGrid.getFindAllButton().setVisible(false);
-        projectGrid.getUpdateButton().setVisible(false);
-        projectGrid.setFindAllOperation(() -> {
-            return projectController.getAllProjects();
-        });
-        projectGrid.getGrid().addItemClickListener(new ComponentEventListener<ItemClickEvent<Project>>() {
+    public void init() {
+        removeAll();
+        setSizeFull();
+        add(createProjectButton());
+        grid2();
+        add(grid);
+    }
+
+    public void grid2() {
+        grid = new Grid<>(ProjectDto.class, false);
+        refresh();
+        grid.addColumn("id").setWidth("75px").setFlexGrow(0);
+        grid.addColumn("title");
+        grid.addColumn("description");
+        grid.addComponentColumn(project -> createEditButton(project)).setKey("edit");
+        grid.addComponentColumn(project -> createRemoveButton(project)).setKey("remove");
+        grid.setColumnReorderingAllowed(false);
+        grid.addItemClickListener(new ComponentEventListener<ItemClickEvent<ProjectDto>>() {
             @Override
-            public void onComponentEvent(ItemClickEvent<Project> projectItemClickEvent) {
-               UI.getCurrent().navigate(ProjectView.class,
+            public void onComponentEvent(ItemClickEvent<ProjectDto> projectItemClickEvent) {
+                UI.getCurrent().navigate(ProjectView.class,
                         projectItemClickEvent.getItem().getId().toString());
             }
         });
-        add(projectGrid);
     }
 
-    private Button createRemoveButton(Project project) {
+    private Button createRemoveButton(ProjectDto project) {
         @SuppressWarnings("unchecked")
-        Button button = new Button("Remove", clickEvent -> {
+        Button button = new Button(getTranslation("remove"), clickEvent -> {
             ConfirmDialog confirmDialog = new ConfirmDialog(
-                    "Are you sure you want to delete the Project: "+project.getTitle()+" ?",
+                    getTranslation("notificationRemove")
+                            + getTranslation("project")
+                            + project.getTitle() + " ?",
                     "",
-                    "Remove",
-                    ()->{
+                    getTranslation("remove"),
+                    () -> {
                         projectController.deleteProject(project.getId());
-                        projectGrid.refreshGrid();
+                        refresh();
                     });
             confirmDialog.open();
         });
@@ -93,10 +82,10 @@ public class ProjectsView extends VerticalLayout {
         return button;
     }
 
-    private Button createEditButton(Project project) {
+    private Button createEditButton(ProjectDto project) {
         @SuppressWarnings("unchecked")
-        Button button = new Button("Edit", clickEvent -> {
-            ProjectDto projectDto = new ProjectDto();
+        Button button = new Button(getTranslation("edit"), clickEvent -> {
+            ProjectDto projectDto = ProjectDto.builder().build();
             Binder<ProjectDto> binder = new Binder<>();
             VerticalLayout content = new VerticalLayout();
             TextField title = new TextField("Title");
@@ -107,8 +96,8 @@ public class ProjectsView extends VerticalLayout {
             binder.forField(description).bind(ProjectDto::getDescription, ProjectDto::setDescription);
             FormLayout gridLayout = new FormLayout();
             gridLayout.add(title, description);
-            Button cancel = new Button("Cancel");
-            Button save = new Button("Save");
+            Button cancel = new Button(getTranslation("cancel"));
+            Button save = new Button(getTranslation("save"));
             save.setIcon(VaadinIcon.PENCIL.create());
             content.add(gridLayout);
             HorizontalLayout hor = new HorizontalLayout();
@@ -129,9 +118,9 @@ public class ProjectsView extends VerticalLayout {
                 public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
                     binder.validate();
                     if (binder.writeBeanIfValid(projectDto)) {
-                        projectController.updateProject(project.getId(),projectDto);
+                        projectController.updateProject(project.getId(), projectDto);
                         window.close();
-                        projectGrid.refreshGrid();
+                        refresh();
                     }
                 }
             });
@@ -141,12 +130,12 @@ public class ProjectsView extends VerticalLayout {
         return button;
     }
 
-    private Button createProjectButton(){
+    private Button createProjectButton() {
         Button createProject = new Button();
         createProject.setIcon(VaadinIcon.PLUS_CIRCLE.create());
-        createProject.setText("Create project");
+        createProject.setText(getTranslation("createProject"));
         createProject.addClickListener(buttonClickEvent -> {
-            ProjectDto projectDto = new ProjectDto();
+            ProjectDto projectDto = ProjectDto.builder().build();
             Binder<ProjectDto> binder = new Binder<>();
             VerticalLayout content = new VerticalLayout();
             TextField title = new TextField("Title");
@@ -155,8 +144,8 @@ public class ProjectsView extends VerticalLayout {
             binder.forField(description).bind(ProjectDto::getDescription, ProjectDto::setDescription);
             FormLayout gridLayout = new FormLayout();
             gridLayout.add(title, description);
-            Button cancel = new Button("Cancel");
-            Button save = new Button("Save");
+            Button cancel = new Button(getTranslation("cancel"));
+            Button save = new Button(getTranslation("save"));
             save.setIcon(VaadinIcon.PENCIL.create());
             content.add(gridLayout);
             HorizontalLayout hor = new HorizontalLayout();
@@ -179,7 +168,7 @@ public class ProjectsView extends VerticalLayout {
                     if (binder.writeBeanIfValid(projectDto)) {
                         projectController.addProject(projectDto);
                         window.close();
-                        projectGrid.refreshGrid();
+                        refresh();
                     }
                 }
             });
@@ -188,7 +177,12 @@ public class ProjectsView extends VerticalLayout {
         return createProject;
     }
 
+    void refresh() {
+        grid.setItems(projectController.getAllProjects());
+    }
 
-
-
+    @Override
+    public void localeChange(LocaleChangeEvent localeChangeEvent) {
+        ReloadPage.reloadPage(localeChangeEvent, this.getClass());
+    }
 }
