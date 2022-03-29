@@ -27,7 +27,6 @@ public class TestController {
         return testService.getAllByProjectId(projectId);
     }
 
-
     @Operation(summary = "Get all Test in Suite", description = "Return all Test in all Projects", tags = { "Test" })
     @GetMapping(value = "/testsInSuite/{suiteId}")
     public Collection<Test> getTestInSuite(@PathVariable Long suiteId) {

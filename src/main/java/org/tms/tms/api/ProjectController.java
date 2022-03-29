@@ -25,7 +25,6 @@ public class ProjectController {
         return projectService.getAllProjects();
     }
 
-
     @Operation(summary = "Get Project by Id", description = "Return Project", tags = {"Project"})
     @GetMapping(value = "/project/{projectId}")
     public ProjectDto getProject(@PathVariable Long projectId) {

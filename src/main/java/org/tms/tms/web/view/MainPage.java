@@ -3,14 +3,19 @@ package org.tms.tms.web.view;
 import com.vaadin.flow.component.*;
 import com.vaadin.flow.component.applayout.AppLayout;
 import com.vaadin.flow.component.applayout.DrawerToggle;
+import com.vaadin.flow.component.avatar.Avatar;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.button.ButtonVariant;
+import com.vaadin.flow.component.contextmenu.MenuItem;
+import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
+import com.vaadin.flow.component.menubar.MenuBar;
+import com.vaadin.flow.component.menubar.MenuBarVariant;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -21,6 +26,7 @@ import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
+import com.vaadin.flow.theme.Theme;
 import lombok.SneakyThrows;
 import org.tms.tms.security.SecurityUtils;
 import org.tms.tms.security.service.UserService;
@@ -46,6 +52,7 @@ public class MainPage extends AppLayout implements LocaleChangeObserver {
     private HorizontalLayout header;
     private Component headerContent;
     private UserService userService;
+    private Avatar avatarName;
 
     public MainPage(UserService userService) {
         //setPrimarySection(Section.DRAWER);
@@ -62,7 +69,6 @@ public class MainPage extends AppLayout implements LocaleChangeObserver {
         header.setId("header");
         header.setWidthFull();
         header.setSpacing(false);
-        //header.getThemeList().set("dark", true);
         header.setAlignItems(FlexComponent.Alignment.CENTER);
         header.add(new DrawerToggle());
         viewTitle = new H1();
@@ -165,31 +171,29 @@ public class MainPage extends AppLayout implements LocaleChangeObserver {
     @Override
     protected void onAttach(AttachEvent attachEvent) {
         super.onAttach(attachEvent);
-
         // User can quickly activate logout with Ctrl+L
         attachEvent.getUI().addShortcutListener(() -> logout(), Key.KEY_L,
                 KeyModifier.CONTROL);
 
-        // add the admin view menu item if user has admin role
-        Button label = new Button();
-        label.setIcon(VaadinIcon.OPEN_BOOK.create());
-        label.getStyle().set("padding-left", "1em");
-        label.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-            @Override
-            public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                UI.getCurrent().getPage().open("swagger-ui.html");
-            }
-        });
+        Button profileButton = createMenuButton(getTranslation("profile"), VaadinIcon.USER.create());
+        profileButton.addClickListener(buttonClickEvent -> UI.getCurrent().navigate(ProfileView.class));
         ChangeThemeComponent changeThemeComponent = new ChangeThemeComponent(headerContent);
-        HorizontalLayout profile = new HorizontalLayout();
-        Label fullName = new Label(userService.getUserByEmail(SecurityUtils.getLoggedUser().getUsername()).getFullName());
-        Icon icon = new Icon(VaadinIcon.EDIT);
-        icon.getStyle().set("margin", "auto");
-        profile.add(icon, fullName);
-        profile.addClickListener(horizontalLayoutClickEvent ->
-                UI.getCurrent().navigate(ProfileView.class));
-        fullName.getStyle().set("padding-right", "1em");
-        addToNavbar(profile, changeThemeComponent, label, new LanguageSelectView().getLangSelect(), logoutButton);
+        avatarName = new Avatar();
+        updateName();
+        MenuBar menuBar = new MenuBar();
+        menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
+        MenuItem menuItem = menuBar.addItem(avatarName);
+        SubMenu subMenu = menuItem.getSubMenu();
+        subMenu.addItem(profileButton);
+        subMenu.addItem(logoutButton);
+        avatarName.getStyle()
+                .set("margin-right", "1em")
+                .set("margin-left", "1em");
+        addToNavbar(changeThemeComponent, new LanguageSelectView().getLangSelect(), menuBar);
+    }
+
+    public void updateName() {
+        avatarName.setName(userService.getUserByEmail(SecurityUtils.getLoggedUser().getUsername()).getFullName());
     }
 
     @Override

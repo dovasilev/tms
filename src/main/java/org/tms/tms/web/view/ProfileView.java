@@ -32,9 +32,9 @@ import org.tms.tms.web.ReloadPage;
 @PageTitle("Profile")
 public class ProfileView extends Div implements LocaleChangeObserver {
 
-    UserService userService;
+    private final UserService userService;
     private Users users;
-    VerticalLayout verticalLayoutMain;
+    private final VerticalLayout verticalLayoutMain;
 
 
     public ProfileView(UserService userService) {
@@ -89,6 +89,7 @@ public class ProfileView extends Div implements LocaleChangeObserver {
                 userService.update(usersDto.getEmail(), usersDto);
                 Notification.show(getTranslation("successUpdateProfile")).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
                 init();
+
             }
         });
         H4 h3 = new H4(getTranslation("profileSettings"));

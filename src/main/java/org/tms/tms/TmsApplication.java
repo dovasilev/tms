@@ -19,10 +19,9 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.tms.tms.config.VaadinI18NProvider;
 import org.tms.tms.security.SecurityUtils;
-import org.tms.tms.web.view.InviteView;
-import org.tms.tms.web.view.ResetPasswordView;
-import org.tms.tms.web.view.SignInView;
-import org.tms.tms.web.view.SignUpView;
+import org.tms.tms.web.view.*;
+
+import java.util.List;
 
 import static java.lang.System.setProperty;
 
@@ -58,8 +57,8 @@ public class TmsApplication extends SpringBootServletInitializer implements Vaad
     }
 
     private void beforeEnter(BeforeEnterEvent event) {
+        String target = event.getLocation().getPath().toLowerCase();
         if (!isLoggedIn()) {
-            String target = event.getLocation().getPath().toLowerCase();
             if (getPathView(SignUpView.class).equals(target)) {
                 event.rerouteTo(SignUpView.class);
             } else if (getPathView(SignInView.class).equals(target)) {
@@ -69,10 +68,20 @@ public class TmsApplication extends SpringBootServletInitializer implements Vaad
             } else if (target.contains(getPathView(InviteView.class))) {
 
             } else event.rerouteTo(SignInView.class);
+        } else {
+            if (!target.toLowerCase().matches(String.join("|", getLoginedPath()))) {
+                event.forwardTo(ProjectsView.class);
+            }
         }
-        else {
-            String s = "";
-        }
+    }
+
+    private List<String> getLoginedPath() {
+        return List.of(
+                getPathView(ProjectsView.class),
+                replaceUrlParam(getPathView(ProjectView.class), "\\/\\d*"),
+                getPathView(MainPage.class),
+                replaceUrlParam(getPathView(ProfileView.class), "\\/\\d*"),
+                "swagger-ui.html");
     }
 
     private boolean isLoggedIn() {
@@ -80,6 +89,10 @@ public class TmsApplication extends SpringBootServletInitializer implements Vaad
     }
 
     private String getPathView(Class<? extends Component> navigationTarget) {
-        return RouteConfiguration.forSessionScope().getUrlBase(navigationTarget).get().toLowerCase();
+        return RouteConfiguration.forSessionScope().getTemplate(navigationTarget).get().toLowerCase();
+    }
+
+    private String replaceUrlParam(String str, String toReplace) {
+        return str.replace("/:___url_parameter*", toReplace);
     }
 }

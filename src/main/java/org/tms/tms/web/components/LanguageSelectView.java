@@ -1,10 +1,12 @@
 package org.tms.tms.web.components;
 
 import ch.carnet.kasparscherrer.LanguageSelect;
+import com.vaadin.flow.component.dependency.CssImport;
 import lombok.Getter;
 
 import java.util.Locale;
 
+@CssImport("./styles/shared-styles.css")
 public class LanguageSelectView extends LanguageSelect {
 
     @Getter
