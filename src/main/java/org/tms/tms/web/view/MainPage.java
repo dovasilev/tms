@@ -28,9 +28,11 @@ import com.vaadin.flow.router.*;
 import com.vaadin.flow.server.VaadinSession;
 import com.vaadin.flow.theme.Theme;
 import lombok.SneakyThrows;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.tms.tms.security.SecurityUtils;
 import org.tms.tms.security.service.UserService;
 import org.tms.tms.web.ReloadPage;
+import org.tms.tms.web.components.AvatarComponent;
 import org.tms.tms.web.components.ChangeThemeComponent;
 import org.tms.tms.web.components.LanguageSelectView;
 
@@ -46,13 +48,15 @@ import java.util.Optional;
 @Route("")
 public class MainPage extends AppLayout implements LocaleChangeObserver {
 
+    @Autowired
+    private AvatarComponent avatarComponent;
+
     private final Tabs menu;
     private H1 viewTitle;
     private Button logoutButton;
     private HorizontalLayout header;
     private Component headerContent;
     private UserService userService;
-    private Avatar avatarName;
 
     public MainPage(UserService userService) {
         //setPrimarySection(Section.DRAWER);
@@ -178,22 +182,13 @@ public class MainPage extends AppLayout implements LocaleChangeObserver {
         Button profileButton = createMenuButton(getTranslation("profile"), VaadinIcon.USER.create());
         profileButton.addClickListener(buttonClickEvent -> UI.getCurrent().navigate(ProfileView.class));
         ChangeThemeComponent changeThemeComponent = new ChangeThemeComponent(headerContent);
-        avatarName = new Avatar();
-        updateName();
         MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
-        MenuItem menuItem = menuBar.addItem(avatarName);
+        MenuItem menuItem = menuBar.addItem(avatarComponent.updateFullName());
         SubMenu subMenu = menuItem.getSubMenu();
         subMenu.addItem(profileButton);
         subMenu.addItem(logoutButton);
-        avatarName.getStyle()
-                .set("margin-right", "1em")
-                .set("margin-left", "1em");
         addToNavbar(changeThemeComponent, new LanguageSelectView().getLangSelect(), menuBar);
-    }
-
-    public void updateName() {
-        avatarName.setName(userService.getUserByEmail(SecurityUtils.getLoggedUser().getUsername()).getFullName());
     }
 
     @Override

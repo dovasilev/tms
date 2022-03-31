@@ -21,16 +21,21 @@ import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.tms.tms.dto.UsersDto;
 import org.tms.tms.security.SecurityUtils;
 import org.tms.tms.security.dao.Users;
 import org.tms.tms.security.service.UserService;
 import org.tms.tms.web.ReloadPage;
+import org.tms.tms.web.components.AvatarComponent;
 
 @CssImport("./styles/shared-styles.css")
 @Route(value = "profile", layout = MainPage.class)
 @PageTitle("Profile")
 public class ProfileView extends Div implements LocaleChangeObserver {
+
+    @Autowired
+    private AvatarComponent avatarComponent;
 
     private final UserService userService;
     private Users users;
@@ -88,8 +93,8 @@ public class ProfileView extends Div implements LocaleChangeObserver {
             if (binder.writeBeanIfValid(usersDto)) {
                 userService.update(usersDto.getEmail(), usersDto);
                 Notification.show(getTranslation("successUpdateProfile")).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                avatarComponent.updateFullName();
                 init();
-
             }
         });
         H4 h3 = new H4(getTranslation("profileSettings"));
