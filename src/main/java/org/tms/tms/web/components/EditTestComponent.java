@@ -43,7 +43,7 @@ public class EditTestComponent extends Dialog {
     SuiteController suiteController;
     private HorizontalLayout hor;
     private Map<Step, Binder> stepBinderMap;
-    Runnable actionClose;
+    private Runnable actionClose;
 
     private Test test;
 
@@ -53,14 +53,15 @@ public class EditTestComponent extends Dialog {
      * @param testController
      * @param actionClose
      */
-    public EditTestComponent(Test test, SuiteController suiteController, TestController testController, Runnable actionClose) {
+    public EditTestComponent(Test test, SuiteController suiteController, TestController testController,
+                             Runnable actionClose) {
         this.test = test;
         this.suiteController = suiteController;
         this.testController = testController;
         this.actionClose = actionClose;
         this.stepBinderMap = new LinkedHashMap<>();
         setSizeFull();
-        setAriaLabel(getTranslation("editTest") + " " + test.getTitle());
+        getElement().setAttribute("aria-label",getTranslation("editTest") + " " + test.getTitle());
         getElement().getStyle().set("scrolling", "auto");
         testDto = new TestDto();
         testDto.setTitle(test.getTitle());

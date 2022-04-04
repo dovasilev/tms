@@ -15,6 +15,8 @@ public class LanguageSelectView extends LanguageSelect {
     public LanguageSelectView() {
         boolean useLanguageCookies = true;
         langSelect = new LanguageSelect(useLanguageCookies, new Locale("ru"), new Locale("en"));
+        langSelect.getElement().getStyle().set("--lumo-contrast-10pct", "none");
+        langSelect.getElement().getStyle().set("--lumo-body-text-color", "none");
         add(langSelect);
     }
 }

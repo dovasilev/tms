@@ -131,24 +131,16 @@ public class SuiteComponent extends VerticalLayout {
             Dialog window = new Dialog();
             window.add(content);
             window.setModal(true);
-            cancel.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-                @Override
-                public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                    window.close();
-                }
-            });
-            save.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
-                @Override
-                public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
-                    binder.validate();
-                    if (binder.writeBeanIfValid(suiteDto)) {
-                        if (select.getValue() != null) {
-                            suiteDto.setParentId(select.getValue().getId());
-                        }
-                        suiteController.updateSuite(suite.getSuite().getId(), suiteDto);
-                        window.close();
-                        UI.getCurrent().getPage().reload();
+            cancel.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent1 -> window.close());
+            save.addClickListener((ComponentEventListener<ClickEvent<Button>>) buttonClickEvent12 -> {
+                binder.validate();
+                if (binder.writeBeanIfValid(suiteDto)) {
+                    if (select.getValue() != null) {
+                        suiteDto.setParentId(select.getValue().getId());
                     }
+                    suiteController.updateSuite(suite.getSuite().getId(), suiteDto);
+                    window.close();
+                    UI.getCurrent().getPage().reload();
                 }
             });
             window.open();

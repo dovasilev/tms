@@ -43,13 +43,14 @@ public class CreateTestComponent extends Dialog {
     TestController testController;
     private HorizontalLayout hor;
     private Map<Step,Binder> stepBinderMap;
-    Runnable actionClose;
+    private Runnable actionClose;
 
-    public CreateTestComponent(Long projectId, SuiteController suiteController, TestController testController, Runnable actionClose) {
+    public CreateTestComponent(Long projectId, SuiteController suiteController, TestController testController,
+                               Runnable actionClose) {
         this.actionClose = actionClose;
         this.stepBinderMap = new LinkedHashMap<>();
         setSizeFull();
-        setAriaLabel(getTranslation("createTestTitle"));
+        getElement().setAttribute("aria-label", getTranslation("createTestTitle"));
         getElement().getStyle().set("scrolling","auto");
         this.testController = testController;
         testDto = new TestDto();
