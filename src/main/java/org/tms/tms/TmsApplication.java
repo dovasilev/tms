@@ -95,4 +95,5 @@ public class TmsApplication extends SpringBootServletInitializer implements Vaad
     private String replaceUrlParam(String str, String toReplace) {
         return str.replace("/:___url_parameter*", toReplace);
     }
+
 }

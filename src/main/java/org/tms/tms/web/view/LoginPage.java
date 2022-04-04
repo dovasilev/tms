@@ -37,7 +37,6 @@ public class LoginPage extends VerticalLayout implements RouterLayout, AfterNavi
         setClassName("login-screen");
         getStyle().set("padding-top", "10%");
         init();
-
     }
 
     void init() {

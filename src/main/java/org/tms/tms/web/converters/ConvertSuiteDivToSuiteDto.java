@@ -4,15 +4,16 @@ import com.vaadin.flow.data.binder.Result;
 import com.vaadin.flow.data.binder.ValueContext;
 import com.vaadin.flow.data.converter.Converter;
 import org.tms.tms.dto.SuiteDto;
+import org.tms.tms.web.components.SuiteDiv;
 import org.tms.tms.web.view.ProjectView;
 
-public class ConvertSuiteDivToSuiteDto implements Converter<ProjectView.SuiteDiv, Long> {
+public class ConvertSuiteDivToSuiteDto implements Converter<SuiteDiv, Long> {
 
     SuiteDto suiteDto;
-    ProjectView.SuiteDiv suiteDiv;
+    SuiteDiv suiteDiv;
 
     @Override
-    public Result<Long> convertToModel(ProjectView.SuiteDiv suiteDiv, ValueContext valueContext) {
+    public Result<Long> convertToModel(SuiteDiv suiteDiv, ValueContext valueContext) {
         if (valueContext==null){
             return Result.ok(null);
         }
@@ -29,7 +30,7 @@ public class ConvertSuiteDivToSuiteDto implements Converter<ProjectView.SuiteDiv
     }
 
     @Override
-    public ProjectView.SuiteDiv convertToPresentation(Long aLong, ValueContext valueContext) {
+    public SuiteDiv convertToPresentation(Long aLong, ValueContext valueContext) {
         return this.suiteDiv;
     }
 

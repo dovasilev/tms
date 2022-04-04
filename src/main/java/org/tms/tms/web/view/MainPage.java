@@ -11,7 +11,6 @@ import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
-import com.vaadin.flow.component.html.Label;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.menubar.MenuBar;
@@ -24,15 +23,15 @@ import com.vaadin.flow.component.tabs.Tabs;
 import com.vaadin.flow.component.tabs.TabsVariant;
 import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
-import com.vaadin.flow.router.*;
+import com.vaadin.flow.router.PageTitle;
+import com.vaadin.flow.router.Route;
+import com.vaadin.flow.router.RouteConfiguration;
+import com.vaadin.flow.router.RouterLink;
 import com.vaadin.flow.server.VaadinSession;
-import com.vaadin.flow.theme.Theme;
 import lombok.SneakyThrows;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.tms.tms.security.SecurityUtils;
 import org.tms.tms.security.service.UserService;
 import org.tms.tms.web.ReloadPage;
-import org.tms.tms.web.components.AvatarComponent;
 import org.tms.tms.web.components.ChangeThemeComponent;
 import org.tms.tms.web.components.LanguageSelectView;
 
@@ -47,9 +46,6 @@ import java.util.Optional;
 @PageTitle("TMS")
 @Route("")
 public class MainPage extends AppLayout implements LocaleChangeObserver {
-
-    @Autowired
-    private AvatarComponent avatarComponent;
 
     private final Tabs menu;
     private H1 viewTitle;
@@ -152,12 +148,6 @@ public class MainPage extends AppLayout implements LocaleChangeObserver {
         } else return getContent().getClass().getAnnotation(PageTitle.class).value();
     }
 
-    private void setTitle(String title) {
-        this.title = title;
-    }
-
-    private String title = "";
-
     private Button createMenuButton(String caption, Icon icon) {
         final Button routerButton = new Button(caption);
         routerButton.setClassName("menu-button");
@@ -184,7 +174,13 @@ public class MainPage extends AppLayout implements LocaleChangeObserver {
         ChangeThemeComponent changeThemeComponent = new ChangeThemeComponent(headerContent);
         MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
-        MenuItem menuItem = menuBar.addItem(avatarComponent.updateFullName());
+        Avatar avatar = new Avatar();
+        avatar.getStyle()
+                .set("margin-right", "1em")
+                .set("margin-left", "1em");
+        MenuItem menuItem = menuBar.addItem(avatar);
+        String fullName = userService.getUserByEmail(SecurityUtils.getLoggedUser().getUsername()).getFullName();
+        avatar.setName(fullName);
         SubMenu subMenu = menuItem.getSubMenu();
         subMenu.addItem(profileButton);
         subMenu.addItem(logoutButton);

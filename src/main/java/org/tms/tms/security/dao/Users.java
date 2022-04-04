@@ -3,12 +3,10 @@ package org.tms.tms.security.dao;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.validator.constraints.Length;
 
-import javax.management.relation.Role;
 import javax.persistence.*;
 import javax.validation.constraints.Email;
-import javax.validation.constraints.NotNull;
-import java.util.Set;
 
 @Entity
 @Table
@@ -30,5 +28,8 @@ public class Users {
     private String password;
 
     private String[] roles;
+
+    @Column(length = 10485760)
+    private String image;
 
 }

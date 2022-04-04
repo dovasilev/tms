@@ -38,7 +38,7 @@ public class EditTestComponent extends Dialog {
     private TestDto testDto;
     int nextStep = 1;
     private HorizontalLayout action;
-    Select<ProjectView.SuiteDiv> select;
+    Select<SuiteDiv> select;
     TestController testController;
     SuiteController suiteController;
     private HorizontalLayout hor;
@@ -83,12 +83,12 @@ public class EditTestComponent extends Dialog {
         select = new Select<>();
         select.setRequiredIndicatorVisible(true);
         select.setLabel("Parent Suite");
-        List<ProjectView.SuiteDiv> suiteList = new LinkedList<>();
+        List<SuiteDiv> suiteList = new LinkedList<>();
         suiteController.getAllSuitesByProject(test.getProjectId().getId())
                 .forEach(x -> {
-                    suiteList.add(new ProjectView.SuiteDiv(x));
+                    suiteList.add(new SuiteDiv(x));
                 });
-        select.setItemLabelGenerator(ProjectView.SuiteDiv::getAllTitle);
+        select.setItemLabelGenerator(SuiteDiv::getAllTitle);
         select.setItems(suiteList);
         binder.forField(select).withConverter(new ConvertSuiteDivToSuiteDto()).asRequired().bind(TestDto::getSuiteId, TestDto::setSuiteId);
         Checkbox isAutomated = new Checkbox();

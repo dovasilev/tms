@@ -1,12 +1,13 @@
 package org.tms.tms.web.view;
 
 import com.vaadin.flow.component.Component;
-import com.vaadin.flow.component.Text;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.notification.Notification;
 import com.vaadin.flow.component.notification.NotificationVariant;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -21,21 +22,21 @@ import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.apache.commons.io.FileUtils;
 import org.tms.tms.dto.UsersDto;
 import org.tms.tms.security.SecurityUtils;
 import org.tms.tms.security.dao.Users;
 import org.tms.tms.security.service.UserService;
 import org.tms.tms.web.ReloadPage;
-import org.tms.tms.web.components.AvatarComponent;
+
+import java.io.File;
+import java.io.IOException;
+import java.util.Base64;
 
 @CssImport("./styles/shared-styles.css")
 @Route(value = "profile", layout = MainPage.class)
 @PageTitle("Profile")
 public class ProfileView extends Div implements LocaleChangeObserver {
-
-    @Autowired
-    private AvatarComponent avatarComponent;
 
     private final UserService userService;
     private Users users;
@@ -57,7 +58,24 @@ public class ProfileView extends Div implements LocaleChangeObserver {
         left.setWidth("15%");
         VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.add(new H2(getTranslation("profile")));
-        verticalLayout.add(new Text("Тут будет ваше фото"));
+        //
+        Image image = new Image();
+        if (users.getImage() != null) {
+            File file = null;
+            try {
+                file = File.createTempFile("", "");
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            try {
+                FileUtils.writeByteArrayToFile(file, Base64.getDecoder().decode(users.getImage()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            image = new Image(file.getAbsolutePath(), "");
+        }
+
+        verticalLayout.add(image);
         left.add(verticalLayout);
         HorizontalLayout right = new HorizontalLayout();
         VerticalLayout settings = new VerticalLayout();
@@ -93,15 +111,13 @@ public class ProfileView extends Div implements LocaleChangeObserver {
             if (binder.writeBeanIfValid(usersDto)) {
                 userService.update(usersDto.getEmail(), usersDto);
                 Notification.show(getTranslation("successUpdateProfile")).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                avatarComponent.updateFullName();
-                init();
+                UI.getCurrent().getPage().reload();
             }
         });
         H4 h3 = new H4(getTranslation("profileSettings"));
         verticalLayout.add(h3, emailField, fullNameField, save);
         return verticalLayout;
     }
-
 
     private Component changePass() {
         VerticalLayout verticalLayout = new VerticalLayout();
@@ -127,7 +143,7 @@ public class ProfileView extends Div implements LocaleChangeObserver {
             if (binder.writeBeanIfValid(usersDto)) {
                 userService.update(usersDto.getEmail(), usersDto);
                 Notification.show(getTranslation("successUpdatePassword")).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
-                init();
+                UI.getCurrent().getPage().reload();
             }
         });
         verticalLayout.add(h3, passwordField, repeatPasswordField, save);
@@ -139,4 +155,5 @@ public class ProfileView extends Div implements LocaleChangeObserver {
     public void localeChange(LocaleChangeEvent localeChangeEvent) {
         ReloadPage.reloadPage(localeChangeEvent, this.getClass());
     }
+
 }

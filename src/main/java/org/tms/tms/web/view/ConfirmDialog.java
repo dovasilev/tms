@@ -36,6 +36,5 @@ public class ConfirmDialog extends Dialog {
         buttons.setJustifyContentMode(FlexComponent.JustifyContentMode.CENTER);
         buttons.add(cancel);
         buttons.add(confirm);
-
     }
 }

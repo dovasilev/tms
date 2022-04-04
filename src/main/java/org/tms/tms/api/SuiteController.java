@@ -31,7 +31,7 @@ public class SuiteController {
 
     @Operation(summary = "Get all Suites in Project", description = "Return all Suites in Project", tags = {"Suite"})
     @GetMapping(value = "/suites/{projectId}")
-    public Collection<Suite> getAllSuitesByProject(@PathVariable Long projectId) {
+    public List<Suite> getAllSuitesByProject(@PathVariable Long projectId) {
         return suiteService.getAllSuitesByProject(projectId);
     }
 

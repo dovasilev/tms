@@ -39,7 +39,7 @@ public class CreateTestComponent extends Dialog {
     private TestDto testDto;
     int i = 1;
     private HorizontalLayout action;
-    Select<ProjectView.SuiteDiv> select;
+    Select<SuiteDiv> select;
     TestController testController;
     private HorizontalLayout hor;
     private Map<Step,Binder> stepBinderMap;
@@ -66,12 +66,12 @@ public class CreateTestComponent extends Dialog {
         select = new Select<>();
         select.setRequiredIndicatorVisible(true);
         select.setLabel("Parent Suite");
-        List<ProjectView.SuiteDiv> suiteList = new LinkedList<>();
+        List<SuiteDiv> suiteList = new LinkedList<>();
         suiteController.getAllSuitesByProject(projectId)
                 .forEach(x -> {
-                    suiteList.add(new ProjectView.SuiteDiv(x));
+                    suiteList.add(new SuiteDiv(x));
                 });
-        select.setItemLabelGenerator(ProjectView.SuiteDiv::getAllTitle);
+        select.setItemLabelGenerator(SuiteDiv::getAllTitle);
         select.setItems(suiteList);
         binder.forField(select).withConverter(new ConvertSuiteDivToSuiteDto()).asRequired().bind(TestDto::getSuiteId,TestDto::setSuiteId);
         Checkbox isAutomated = new Checkbox();
