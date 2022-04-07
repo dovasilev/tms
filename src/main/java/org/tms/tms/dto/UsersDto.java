@@ -11,6 +11,7 @@ public class UsersDto {
         this.fullName = users.getFullName();
         this.pass = users.getPassword();
         this.roles = users.getRoles();
+        this.image = users.getImage();
     }
 
     public UsersDto() {
@@ -22,4 +23,5 @@ public class UsersDto {
     private String pass;
     private String repeatPass;
     private String[] roles;
+    private String image;
 }

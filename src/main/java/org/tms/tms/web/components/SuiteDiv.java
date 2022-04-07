@@ -26,7 +26,6 @@ public class SuiteDiv {
         } else {
             allTitle = title;
         }
-
     }
 
     private Long id;

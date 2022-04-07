@@ -44,11 +44,17 @@ public class UserService {
         if (usersDto.getPass() != null)
             users.setPassword(passwordEncoder.encode(usersDto.getPass()));
         users.setRoles(usersDto.getRoles());
+        users.setImage(usersDto.getImage());
+        users.setUserEmail(usersDto.getEmail());
         return userRepository.save(users);
     }
 
     public boolean checkPass(String currentPassDecode, String newPass) {
         return passwordEncoder.matches(newPass, currentPassDecode);
+    }
+
+    public String encodePass(String password) {
+        return passwordEncoder.encode(password);
     }
 
 }

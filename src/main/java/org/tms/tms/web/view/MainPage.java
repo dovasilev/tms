@@ -89,8 +89,8 @@ public class MainPage extends AppLayout implements LocaleChangeObserver {
         HorizontalLayout logoLayout = new HorizontalLayout();
         logoLayout.setId("logo");
         logoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        logoLayout.add(new Image("images/logos/18.png", "TMS"));
-        logoLayout.add(new H1("TMS"));
+        logoLayout.add(new Image("images/logos/18.png", "Logo"));
+        //logoLayout.add(new H1("TMS"));
         layout.add(logoLayout, menu);
         return layout;
     }

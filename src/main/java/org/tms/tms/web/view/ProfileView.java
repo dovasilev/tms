@@ -1,6 +1,7 @@
 package org.tms.tms.web.view;
 
 import com.vaadin.flow.component.Component;
+import com.vaadin.flow.component.Text;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
@@ -15,6 +16,8 @@ import com.vaadin.flow.component.orderedlayout.VerticalLayout;
 import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
+import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.EmailValidator;
 import com.vaadin.flow.data.validator.StringLengthValidator;
@@ -22,15 +25,27 @@ import com.vaadin.flow.i18n.LocaleChangeEvent;
 import com.vaadin.flow.i18n.LocaleChangeObserver;
 import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
-import org.apache.commons.io.FileUtils;
+import com.vaadin.flow.server.InputStreamFactory;
+import com.vaadin.flow.server.StreamResource;
+import com.vaadin.flow.server.VaadinService;
+import com.vaadin.flow.server.VaadinSession;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.tms.tms.dto.UsersDto;
 import org.tms.tms.security.SecurityUtils;
 import org.tms.tms.security.dao.Users;
 import org.tms.tms.security.service.UserService;
 import org.tms.tms.web.ReloadPage;
 
-import java.io.File;
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.Base64;
 
 @CssImport("./styles/shared-styles.css")
@@ -41,10 +56,11 @@ public class ProfileView extends Div implements LocaleChangeObserver {
     private final UserService userService;
     private Users users;
     private final VerticalLayout verticalLayoutMain;
+    private AuthenticationManager authenticationManager;
 
-
-    public ProfileView(UserService userService) {
+    public ProfileView(UserService userService, AuthenticationManager authenticationManager) {
         this.userService = userService;
+        this.authenticationManager = authenticationManager;
         verticalLayoutMain = new VerticalLayout();
         verticalLayoutMain.setSizeFull();
         init();
@@ -59,23 +75,12 @@ public class ProfileView extends Div implements LocaleChangeObserver {
         VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.add(new H2(getTranslation("profile")));
         //
-        Image image = new Image();
         if (users.getImage() != null) {
-            File file = null;
-            try {
-                file = File.createTempFile("", "");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            try {
-                FileUtils.writeByteArrayToFile(file, Base64.getDecoder().decode(users.getImage()));
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            image = new Image(file.getAbsolutePath(), "");
+            verticalLayout.add(convertToImage(Base64.getDecoder().decode(users.getImage())));
+        } else {
+            verticalLayout.add(new Text("Нет фото"));
         }
-
-        verticalLayout.add(image);
+        verticalLayout.add(uploadPhoto());
         left.add(verticalLayout);
         HorizontalLayout right = new HorizontalLayout();
         VerticalLayout settings = new VerticalLayout();
@@ -92,6 +97,7 @@ public class ProfileView extends Div implements LocaleChangeObserver {
         VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.setSizeFull();
         UsersDto usersDto = new UsersDto(users);
+        String email = users.getUserEmail();
         usersDto.setPass(null);
         Binder<UsersDto> binder = new Binder<>();
         EmailField emailField = new EmailField(getTranslation("email"));
@@ -109,8 +115,11 @@ public class ProfileView extends Div implements LocaleChangeObserver {
         Button save = new Button(getTranslation("save"));
         save.addClickListener(buttonClickEvent -> {
             if (binder.writeBeanIfValid(usersDto)) {
-                userService.update(usersDto.getEmail(), usersDto);
+                userService.update(email, usersDto);
                 Notification.show(getTranslation("successUpdateProfile")).addThemeVariants(NotificationVariant.LUMO_SUCCESS);
+                if (!email.equals(usersDto.getEmail())) {
+                    VaadinSession.getCurrent().getSession().invalidate();
+                }
                 UI.getCurrent().getPage().reload();
             }
         });
@@ -148,6 +157,57 @@ public class ProfileView extends Div implements LocaleChangeObserver {
         });
         verticalLayout.add(h3, passwordField, repeatPasswordField, save);
         return verticalLayout;
+    }
+
+    private Image convertToImage(byte[] imageData) {
+        StreamResource streamResource = new StreamResource("isr", new InputStreamFactory() {
+            @Override
+            public InputStream createInputStream() {
+                return new ByteArrayInputStream(resize(imageData));
+            }
+        });
+        return new Image(streamResource, "photo");
+    }
+
+
+    private byte[] resize(byte[] bytes) {
+        BufferedImage image = null;
+        try {
+            image = ImageIO.read(new ByteArrayInputStream(bytes));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        BufferedImage resizedImage = new BufferedImage(200, 200, image.getType());
+        Graphics2D g = resizedImage.createGraphics();
+        g.drawImage(image, 0, 0, 200, 200, null);
+        g.dispose();
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        boolean foundWriter = false;
+        try {
+            foundWriter = ImageIO.write(resizedImage, "jpg", baos);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        assert foundWriter;
+        return baos.toByteArray();
+    }
+
+    private Upload uploadPhoto() {
+        MemoryBuffer memoryBuffer = new MemoryBuffer();
+        Upload singleFileUpload = new Upload(memoryBuffer);
+        singleFileUpload.addSucceededListener(event -> {
+            UsersDto usersDto = new UsersDto(users);
+            usersDto.setPass(null);
+            usersDto.setImage(null);
+            try {
+                usersDto.setImage(Base64.getEncoder().encodeToString(memoryBuffer.getInputStream().readAllBytes()));
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            userService.update(usersDto.getEmail(), usersDto);
+            UI.getCurrent().getPage().reload();
+        });
+        return singleFileUpload;
     }
 
 
