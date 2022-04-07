@@ -15,16 +15,12 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
 import org.springframework.boot.autoconfigure.web.servlet.error.ErrorMvcAutoConfiguration;
 import org.springframework.boot.web.servlet.support.SpringBootServletInitializer;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
 import org.tms.tms.config.VaadinI18NProvider;
 import org.tms.tms.security.SecurityUtils;
 import org.tms.tms.web.view.*;
 
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-import java.io.File;
 import java.util.List;
 
 import static java.lang.System.setProperty;
@@ -36,8 +32,6 @@ import static java.lang.System.setProperty;
 @PWA(name = "TMS", shortName = "TMS")
 public class TmsApplication extends SpringBootServletInitializer implements VaadinServiceInitListener,
         AppShellConfigurator {
-
-    private File tempDir;
 
     public static void main(String[] args) {
         SpringApplication.run(TmsApplication.class, args);
