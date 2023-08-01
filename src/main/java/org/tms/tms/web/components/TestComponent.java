@@ -5,6 +5,8 @@ import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.html.H4;
+import com.vaadin.flow.component.html.Image;
+import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
 import com.vaadin.flow.component.orderedlayout.VerticalLayout;
@@ -13,7 +15,7 @@ import org.tms.tms.api.TestController;
 import org.tms.tms.dao.Test;
 import org.tms.tms.web.view.ConfirmDialog;
 
-public class TestComponent extends VerticalLayout {
+public class TestComponent extends HorizontalLayout {
 
     private final Test test;
     private final SuiteController suiteController;
@@ -25,9 +27,11 @@ public class TestComponent extends VerticalLayout {
         this.testController = testController;
         HorizontalLayout testDiv = new HorizontalLayout();
         H4 titleTest = new H4(test.getTitle());
-        titleTest.getStyle().set("margin-top", "auto");
-        testDiv.addAndExpand(titleTest, actionsTest());
-        add(testDiv);
+        titleTest.getStyle().set("margin", "auto");
+        Icon testIcon = new Icon("lumo", "ordered-list");
+        testDiv.add(testIcon, titleTest, actionsTest());
+        setAlignItems(Alignment.CENTER);
+        add(testIcon, titleTest, actionsTest());
     }
 
     private HorizontalLayout actionsTest() {

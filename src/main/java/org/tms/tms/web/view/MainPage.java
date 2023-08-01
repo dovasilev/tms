@@ -9,6 +9,7 @@ import com.vaadin.flow.component.button.ButtonVariant;
 import com.vaadin.flow.component.contextmenu.MenuItem;
 import com.vaadin.flow.component.contextmenu.SubMenu;
 import com.vaadin.flow.component.dependency.CssImport;
+import com.vaadin.flow.component.html.Div;
 import com.vaadin.flow.component.html.H1;
 import com.vaadin.flow.component.html.Image;
 import com.vaadin.flow.component.icon.Icon;
@@ -27,14 +28,18 @@ import com.vaadin.flow.router.PageTitle;
 import com.vaadin.flow.router.Route;
 import com.vaadin.flow.router.RouteConfiguration;
 import com.vaadin.flow.router.RouterLink;
+import com.vaadin.flow.server.StreamResource;
 import com.vaadin.flow.server.VaadinSession;
 import lombok.SneakyThrows;
+import org.apache.commons.codec.binary.Base64;
 import org.tms.tms.security.SecurityUtils;
+import org.tms.tms.security.dao.Users;
 import org.tms.tms.security.service.UserService;
 import org.tms.tms.web.ReloadPage;
 import org.tms.tms.web.components.ChangeThemeComponent;
 import org.tms.tms.web.components.LanguageSelectView;
 
+import java.io.ByteArrayInputStream;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -174,13 +179,24 @@ public class MainPage extends AppLayout implements LocaleChangeObserver {
         ChangeThemeComponent changeThemeComponent = new ChangeThemeComponent(headerContent);
         MenuBar menuBar = new MenuBar();
         menuBar.addThemeVariants(MenuBarVariant.LUMO_TERTIARY_INLINE);
-        Avatar avatar = new Avatar();
-        avatar.getStyle()
-                .set("margin-right", "1em")
-                .set("margin-left", "1em");
-        MenuItem menuItem = menuBar.addItem(avatar);
-        String fullName = userService.getUserByEmail(SecurityUtils.getLoggedUser().getUsername()).getFullName();
-        avatar.setName(fullName);
+        Users userByEmail = userService.getUserByEmail(SecurityUtils.getLoggedUser().getUsername());
+        Avatar avatar = new Avatar(userByEmail.getFullName());
+        if (userByEmail.getImage() != null) {
+            StreamResource resource = new StreamResource("profile-pic",
+                    () -> new ByteArrayInputStream(Base64.decodeBase64(userByEmail.getImage())));
+            avatar.setImageResource(resource);
+        }
+        avatar.setThemeName("xsmall");
+        avatar.getElement().setAttribute("tabindex", "-1");
+        Div div = new Div();
+        div.add(avatar);
+        div.add(userByEmail.getFullName());
+        div.add(new Icon("lumo", "dropdown"));
+        div.getElement().getStyle().set("display", "flex");
+        div.getElement().getStyle().set("align-items", "center");
+        div.getElement().getStyle().set("gap", "var(--lumo-space-s)");
+        MenuItem menuItem = menuBar.addItem(div);
+
         SubMenu subMenu = menuItem.getSubMenu();
         subMenu.addItem(profileButton);
         subMenu.addItem(logoutButton);

@@ -43,12 +43,17 @@ public class SuiteComponent extends VerticalLayout {
         VerticalLayout verticalLayout = new VerticalLayout();
         suite.getTests().forEach(test -> verticalLayout.add(new TestComponent(test, suiteController, testController)));
         suite.getChildSuites().forEach(suiteChild ->
-                verticalLayout.add(
-                        new SuiteComponent(
-                                suiteChild,
-                                allSuites,
-                                suiteController,
-                                testController)));
+        {
+            SuiteComponent suiteComponent = new SuiteComponent(
+                    suiteChild,
+                    allSuites,
+                    suiteController,
+                    testController);
+            suiteComponent.getStyle().set("padding-left", "0");
+            suiteComponent.getStyle().set("padding-top", "0");
+            verticalLayout.add(
+                    suiteComponent);
+        });
         detail.setContent(verticalLayout);
         detail.setOpened(false);
         HorizontalLayout horizontalLayout = new HorizontalLayout();
@@ -62,7 +67,8 @@ public class SuiteComponent extends VerticalLayout {
         horizontalLayout.setSizeFull();
         horizontalLayout.setPadding(true);
         H3 h3 = new H3(suite.getSuite().getTitle());
-        horizontalLayout.addAndExpand(h3, actionsSuite());
+        horizontalLayout.setAlignItems(Alignment.CENTER);
+        horizontalLayout.addAndExpand(VaadinIcon.FOLDER.create(), h3, actionsSuite());
         return horizontalLayout;
     }
 

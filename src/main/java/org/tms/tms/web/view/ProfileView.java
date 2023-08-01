@@ -17,6 +17,7 @@ import com.vaadin.flow.component.textfield.EmailField;
 import com.vaadin.flow.component.textfield.PasswordField;
 import com.vaadin.flow.component.textfield.TextField;
 import com.vaadin.flow.component.upload.Upload;
+import com.vaadin.flow.component.upload.UploadI18N;
 import com.vaadin.flow.component.upload.receivers.MemoryBuffer;
 import com.vaadin.flow.data.binder.Binder;
 import com.vaadin.flow.data.validator.EmailValidator;
@@ -76,7 +77,9 @@ public class ProfileView extends Div implements LocaleChangeObserver {
         verticalLayout.add(new H2(getTranslation("profile")));
         //
         if (users.getImage() != null) {
-            verticalLayout.add(convertToImage(Base64.getDecoder().decode(users.getImage())));
+            Image image = convertToImage(Base64.getDecoder().decode(users.getImage()));
+            image.setWidth("100%");
+            verticalLayout.add(image);
         } else {
             verticalLayout.add(new Text("Нет фото"));
         }
@@ -163,33 +166,10 @@ public class ProfileView extends Div implements LocaleChangeObserver {
         StreamResource streamResource = new StreamResource("isr", new InputStreamFactory() {
             @Override
             public InputStream createInputStream() {
-                return new ByteArrayInputStream(resize(imageData));
+                return new ByteArrayInputStream(imageData);
             }
         });
         return new Image(streamResource, "photo");
-    }
-
-
-    private byte[] resize(byte[] bytes) {
-        BufferedImage image = null;
-        try {
-            image = ImageIO.read(new ByteArrayInputStream(bytes));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        BufferedImage resizedImage = new BufferedImage(200, 200, image.getType());
-        Graphics2D g = resizedImage.createGraphics();
-        g.drawImage(image, 0, 0, 200, 200, null);
-        g.dispose();
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        boolean foundWriter = false;
-        try {
-            foundWriter = ImageIO.write(resizedImage, "jpg", baos);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        assert foundWriter;
-        return baos.toByteArray();
     }
 
     private Upload uploadPhoto() {
