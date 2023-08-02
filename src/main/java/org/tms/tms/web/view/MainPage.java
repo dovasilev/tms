@@ -94,8 +94,11 @@ public class MainPage extends AppLayout implements LocaleChangeObserver {
         HorizontalLayout logoLayout = new HorizontalLayout();
         logoLayout.setId("logo");
         logoLayout.setAlignItems(FlexComponent.Alignment.CENTER);
-        logoLayout.add(new Image("images/logos/18.png", "Logo"));
-        //logoLayout.add(new H1("TMS"));
+        Image logo = new Image("icons/icon.png", "Logo");
+        logo.setId("logo");
+        logo.setWidth("100%");
+        logo.setHeight("100%");
+        logoLayout.add(logo);
         layout.add(logoLayout, menu);
         return layout;
     }
@@ -104,7 +107,6 @@ public class MainPage extends AppLayout implements LocaleChangeObserver {
         final Tabs tabs = new Tabs();
         tabs.setOrientation(Tabs.Orientation.VERTICAL);
         tabs.addThemeVariants(TabsVariant.LUMO_SMALL);
-        tabs.setId("tabs");
         tabs.add(createMenuItems());
         return tabs;
     }

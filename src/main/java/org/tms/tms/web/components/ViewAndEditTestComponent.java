@@ -1,6 +1,7 @@
 package org.tms.tms.web.components;
 
 import com.vaadin.flow.component.ClickEvent;
+import com.vaadin.flow.component.Component;
 import com.vaadin.flow.component.ComponentEventListener;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.checkbox.Checkbox;
@@ -22,8 +23,6 @@ import org.tms.tms.dao.Steps;
 import org.tms.tms.dao.Test;
 import org.tms.tms.dto.TestDto;
 import org.tms.tms.web.converters.ConvertSuiteDivToSuiteDto;
-import org.tms.tms.web.view.ProjectView;
-import org.vaadin.maxime.MarkdownArea;
 
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -31,7 +30,7 @@ import java.util.List;
 import java.util.Map;
 
 @CssImport("./styles/shared-styles.css")
-public class EditTestComponent extends Dialog {
+public class ViewAndEditTestComponent extends Dialog {
 
     private VerticalLayout verticalStep = new VerticalLayout();
     private Binder<TestDto> binder;
@@ -53,15 +52,19 @@ public class EditTestComponent extends Dialog {
      * @param testController
      * @param actionClose
      */
-    public EditTestComponent(Test test, SuiteController suiteController, TestController testController,
-                             Runnable actionClose) {
+    public ViewAndEditTestComponent(Test test, SuiteController suiteController, TestController testController,
+                                    Runnable actionClose, Boolean isEditable) {
+        String titleHeader = getTranslation("viewTest");
+        if (isEditable) {
+            titleHeader = getTranslation("editTest");
+        }
         this.test = test;
         this.suiteController = suiteController;
         this.testController = testController;
         this.actionClose = actionClose;
         this.stepBinderMap = new LinkedHashMap<>();
         setSizeFull();
-        getElement().setAttribute("aria-label",getTranslation("editTest") + " " + test.getTitle());
+        getElement().setAttribute("aria-label", String.format("%s %s", titleHeader, test.getTitle()));
         getElement().getStyle().set("scrolling", "auto");
         testDto = new TestDto();
         testDto.setTitle(test.getTitle());
@@ -99,7 +102,9 @@ public class EditTestComponent extends Dialog {
         binder.forField(status).bind(TestDto::getStatus, TestDto::setStatus);
         action = new HorizontalLayout();
         Button createStep = new Button(getTranslation("createStep"));
-        action.add(createStep);
+        if (isEditable) {
+            action.add(createStep);
+        }
         createStep.addClickListener(new ComponentEventListener<ClickEvent<Button>>() {
             @Override
             public void onComponentEvent(ClickEvent<Button> buttonClickEvent) {
@@ -117,21 +122,23 @@ public class EditTestComponent extends Dialog {
         gridLayout.add(action, 7);
         content.add(gridLayout);
         add(content);
-        cancelSave();
+        cancelSave(isEditable);
         binder.setBean(testDto);
         select.setValue(suiteList.stream().filter(x -> x.getId().equals(test.getSuiteId().getId())).findFirst().get());
         testDto.getSteps().getSteps().forEach(step -> {
-            renderStep(step);
+            renderStep(step, isEditable);
         });
         stepBinderMap.forEach((step, binder1) -> {
             binder1.setBean(step);
         });
+        fieldEditable(isEditable, title, description, select, isAutomated, status);
         open();
     }
 
-    private void cancelSave() {
-        Button cancel = new Button(getTranslation("cancel"));
+    private void cancelSave(Boolean isEditable) {
+        Button cancel = new Button(isEditable ? getTranslation("cancel") : getTranslation("close"));
         Button save = new Button(getTranslation("save"));
+        save.setVisible(isEditable);
         save.setIcon(VaadinIcon.PENCIL.create());
         cancel.addClickListener(buttonClickEvent -> {
             close();
@@ -162,8 +169,7 @@ public class EditTestComponent extends Dialog {
         add(hor);
     }
 
-
-    private void renderStep(Step step) {
+    private void renderStep(Step step, Boolean isEditable) {
         Binder<Step> stepBinder = new Binder<>();
         VerticalLayout verticalLayout = new VerticalLayout();
         verticalLayout.add(new Label(getTranslation("step") + step.getNumber()));
@@ -184,9 +190,14 @@ public class EditTestComponent extends Dialog {
         result.getElement().getStyle().set("width", "50%");
         horizontalLayout.add(action);
         horizontalLayout.add(result);
-        stepBinder.forField(action.getInput()).bind(Step::getAction, Step::setAction);
-        stepBinder.forField(result.getInput()).bind(Step::getExpectedResult, Step::setExpectedResult);
-        stepBinderMap.put(step, stepBinder);
+        action.editable(isEditable, step.getAction());
+        result.editable(isEditable, step.getExpectedResult());
+        if (isEditable) {
+            stepBinder.forField(action.getInput()).bind(Step::getAction, Step::setAction);
+            stepBinder.forField(result.getInput()).bind(Step::getExpectedResult, Step::setExpectedResult);
+            stepBinderMap.put(step, stepBinder);
+
+        }
         nextStep = step.getNumber() + 1;
         verticalLayout.add(horizontalLayout);
         add(verticalLayout);
@@ -225,4 +236,15 @@ public class EditTestComponent extends Dialog {
         add(this.action);
     }
 
+    private void fieldEditable(Boolean isEditable, Component... components) {
+        if (!isEditable) {
+            for (Component component : components) {
+                if (component instanceof Checkbox) {
+                    component.getElement().setAttribute("onClick", "return false;");
+                } else {
+                    component.getElement().setAttribute("readonly", "readonly");
+                }
+            }
+        }
+    }
 }

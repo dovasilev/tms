@@ -3,16 +3,18 @@ package org.tms.tms.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.tms.tms.dao.Suite;
+import org.tms.tms.dao.Test;
 import org.tms.tms.dto.ProjectDto;
 import org.tms.tms.dto.SuiteChild;
 import org.tms.tms.dto.SuiteDto;
 import org.tms.tms.mappers.ProjectMapper;
 import org.tms.tms.repo.SuiteRepo;
+import org.tms.tms.web.model.ParentWebModel;
+import org.tms.tms.web.model.SuiteWebModel;
+import org.tms.tms.web.model.TestWebModel;
 
 import javax.transaction.Transactional;
-import java.util.Collection;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -48,7 +50,7 @@ public class SuiteService {
         return suiteRepo.findChildSuitesBySuite(suiteId);
     }
 
-    public Suite getSuiteById(Long suiteId) {
+    public Suite getSuiteById(Long suiteId) throws NoSuchElementException {
         return suiteRepo.findById(suiteId).get();
     }
 
@@ -104,6 +106,20 @@ public class SuiteService {
         return suiteChildren;
     }
 
+    public List<ParentWebModel> suiteChildNew(Long projectId) {
+        List<ParentWebModel> suiteChildren = new LinkedList<>();
+        List<Suite> allSuites = getAllSuitesByProject(projectId);
+        List<Test> allTests = testService.getAllByProjectId(projectId);
+        List<Suite> parent = allSuites.stream().filter(x -> x.getParentId() == null).collect(Collectors.toList());
+        List<Suite> children = allSuites.stream().filter(x -> x.getParentId() != null).collect(Collectors.toList());
+        parent.forEach(x -> {
+            suiteChildren.add(new SuiteWebModel(
+                    x,
+                    new ArrayList<>(childrenNew(x, children, allTests))));
+        });
+        return suiteChildren;
+    }
+
     private Collection<SuiteChild> children(Suite parent, List<Suite> childs) {
         Collection<SuiteChild> suiteChildren = new LinkedList<>();
         childs.stream()
@@ -113,9 +129,28 @@ public class SuiteService {
                     suiteChildren.add(
                             new SuiteChild(
                                     x,
-                                    children(x, childs).stream().collect(Collectors.toList()),
-                                    allChildren(childs, x).stream().collect(Collectors.toList()),
+                                    new ArrayList<>(children(x, childs)),
+                                    new ArrayList<>(allChildren(childs, x)),
                                     testService.getAllBySuiteId(x.getId())));
+                });
+        return suiteChildren;
+    }
+
+    private Collection<ParentWebModel> childrenNew(Suite parent, List<Suite> allSuite, List<Test> allTests) {
+        Collection<ParentWebModel> suiteChildren = new LinkedList<>();
+        allTests.stream()
+                .filter(y -> y.getSuiteId().getId().equals(parent.getId()))
+                .collect(Collectors.toList())
+                .forEach(x -> {
+                    suiteChildren.add(
+                            new TestWebModel(x));
+                });
+        allSuite.stream()
+                .filter(y -> y.getParentId().getId().equals(parent.getId()))
+                .collect(Collectors.toList())
+                .forEach(x -> {
+                    suiteChildren.add(
+                            new SuiteWebModel(x, new ArrayList<>(childrenNew(x, allSuite, allTests))));
                 });
         return suiteChildren;
     }

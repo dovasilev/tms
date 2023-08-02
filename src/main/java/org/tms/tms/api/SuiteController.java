@@ -2,15 +2,20 @@ package org.tms.tms.api;
 
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.tms.tms.dao.Suite;
 import org.tms.tms.dto.SuiteChild;
 import org.tms.tms.dto.SuiteDto;
 import org.tms.tms.services.SuiteService;
+import org.tms.tms.web.model.ParentWebModel;
+import org.tms.tms.web.model.SuiteWebModel;
 
 import java.util.Collection;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @RestController
 @RequestMapping("/api")
@@ -25,8 +30,13 @@ public class SuiteController {
 
     @Operation(summary = "Get Suite", description = "Return Suite", tags = {"Suite"})
     @GetMapping(value = "/suite/{suiteId}")
-    public Suite getSuiteById(@PathVariable Long suiteId) {
-        return suiteService.getSuiteById(suiteId);
+    public ResponseEntity<Suite> getSuiteById(@PathVariable Long suiteId) {
+        try {
+            Suite suite = suiteService.getSuiteById(suiteId);
+            return new ResponseEntity<>(suite, HttpStatus.OK);
+        } catch (NoSuchElementException e) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
     }
 
     @Operation(summary = "Get all Suites in Project", description = "Return all Suites in Project", tags = {"Suite"})
@@ -71,6 +81,12 @@ public class SuiteController {
     @GetMapping(value = "/suitesHierarchy/{projectId}")
     public List<SuiteChild> getSuiteHierarchy(@PathVariable Long projectId) {
         return suiteService.suiteChild(projectId);
+    }
+
+    @Operation(summary = "Get Hierarchy Suites in Project", description = "Return Hierarchy Suites in Project", tags = {"Suite"})
+    @GetMapping(value = "/suitesHierarchyNew/{projectId}")
+    public List<ParentWebModel> getSuiteHierarchyNew(@PathVariable Long projectId) {
+        return suiteService.suiteChildNew(projectId);
     }
 
 }
