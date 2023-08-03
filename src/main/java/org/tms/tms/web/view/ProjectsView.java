@@ -9,6 +9,7 @@ import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
 import com.vaadin.flow.component.grid.ItemClickEvent;
+import com.vaadin.flow.component.html.H2;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
 import com.vaadin.flow.component.orderedlayout.HorizontalLayout;
@@ -39,7 +40,7 @@ public class ProjectsView extends VerticalLayout implements LocaleChangeObserver
     public void init() {
         removeAll();
         setSizeFull();
-        add(createProjectButton());
+        add(new H2("Проекты"), createProjectButton());
         grid2();
         add(grid);
     }

@@ -3,12 +3,13 @@ package org.tms.tms.web.view;
 import com.vaadin.componentfactory.explorer.ExplorerTreeGrid;
 import com.vaadin.flow.component.ClickEvent;
 import com.vaadin.flow.component.ComponentEventListener;
+import com.vaadin.flow.component.UI;
 import com.vaadin.flow.component.button.Button;
 import com.vaadin.flow.component.dependency.CssImport;
 import com.vaadin.flow.component.dialog.Dialog;
 import com.vaadin.flow.component.formlayout.FormLayout;
 import com.vaadin.flow.component.grid.Grid;
-import com.vaadin.flow.component.html.Label;
+import com.vaadin.flow.component.html.*;
 import com.vaadin.flow.component.icon.Icon;
 import com.vaadin.flow.component.icon.VaadinIcon;
 import com.vaadin.flow.component.orderedlayout.FlexComponent;
@@ -50,8 +51,8 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
 
     private final Button createTestButton;
     private final HorizontalLayout removeAction;
+    private final HorizontalLayout projectAction;
     private Button removeButton;
-    private final HorizontalLayout header;
     private Long projectId;
     private final SuiteController suiteController;
     private final TestController testController;
@@ -67,9 +68,20 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
         Button createSuiteButton = createSuiteButton();
         createTestButton = createTestButton();
         removeAction = new HorizontalLayout();
-        header = new HorizontalLayout();
-        header.add(createSuiteButton, createTestButton, removeAction);
-        add(header);
+        projectAction = new HorizontalLayout();
+        projectAction.setAlignItems(Alignment.CENTER);
+        Button backButton = new Button();
+        Icon icon = VaadinIcon.ARROW_BACKWARD.create();
+        icon.getStyle().set("padding", "0");
+        icon.getStyle().set("width", "var(--lumo-icon-size-l)");
+        icon.getStyle().set("height", "var(--lumo-icon-size-l)");
+        icon.getStyle().set("margin-top", "1.25em");
+        backButton.setIcon(icon);
+        backButton.addClickListener(buttonClickEvent -> UI.getCurrent().navigate(ProjectsView.class));
+        projectAction.add(backButton);
+        HorizontalLayout action = new HorizontalLayout();
+        action.add(createSuiteButton, createTestButton, removeAction);
+        add(projectAction, action);
         add(body);
 
     }
@@ -77,6 +89,7 @@ public class ProjectView extends VerticalLayout implements HasUrlParameterMappin
     @UrlParameter(name = "projectId")
     public void setProjectId(Long projectId) {
         this.projectId = projectId;
+        projectAction.add(new H2(getTranslation("project").concat(projectId.toString())));
         refresh();
     }
 
